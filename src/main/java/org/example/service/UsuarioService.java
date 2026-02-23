@@ -36,11 +36,13 @@ public class UsuarioService {
     public void setDeporteFavorito(Usuario usuario, Deporte deporte) {
         usuario.setDeporteFavorito(deporte);
         deporte.agregarUsuario(usuario);
+        usuarioRepository.guardar(usuario);
         System.out.println(usuario.getNombreUsuario() + " → deporte favorito: " + deporte.getNombre());
     }
 
     public void setNivel(Usuario usuario, NivelState nivel) {
         usuario.setNivel(nivel);
+        usuarioRepository.guardar(usuario);
         System.out.println(usuario.getNombreUsuario() + " → nivel: " + nivel.getNombre());
     }
 

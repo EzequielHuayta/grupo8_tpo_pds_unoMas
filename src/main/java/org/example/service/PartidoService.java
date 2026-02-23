@@ -36,6 +36,7 @@ public class PartidoService {
         Partido partido = crearPartido(deporte, cantidadJugadores, duracionMinutos, ubicacion, horario);
         partido.setNivelMinimo(nivelMinimo);
         partido.setNivelMaximo(nivelMaximo);
+        partidoRepository.guardar(partido); // persist nivel changes
         return partido;
     }
 
@@ -43,6 +44,7 @@ public class PartidoService {
         Jugador jugador = new Jugador(partidoRepository.generarIdJugador(), usuario);
         partido.agregarJugador(jugador);
         usuario.agregarPartidoAlHistorial(partido);
+        partidoRepository.guardar(partido); // persist new jugador + possible state change
     }
 
     public void confirmarJugador(Partido partido, Usuario usuario) {
@@ -51,18 +53,22 @@ public class PartidoService {
                 .findFirst()
                 .ifPresent(Jugador::confirmar);
         partido.confirmar();
+        partidoRepository.guardar(partido);
     }
 
     public void cancelarPartido(Partido partido) {
         partido.cancelar();
+        partidoRepository.guardar(partido);
     }
 
     public void iniciarPartido(Partido partido) {
         partido.iniciar();
+        partidoRepository.guardar(partido);
     }
 
     public void finalizarPartido(Partido partido) {
         partido.finalizar();
+        partidoRepository.guardar(partido);
     }
 
     public List<Partido> buscarPartidos(Usuario usuario) {
