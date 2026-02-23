@@ -1,11 +1,13 @@
 package org.example.repository;
 
 import org.example.model.Partido;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class PartidoRepositoryImpl implements IPartidoRepository {
     private final List<Partido> partidos;
     private Long nextId;

@@ -1,11 +1,13 @@
 package org.example.repository;
 
 import org.example.model.Usuario;
+import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public class UsuarioRepositoryImpl implements IUsuarioRepository {
     private final List<Usuario> usuarios;
     private Long nextId;

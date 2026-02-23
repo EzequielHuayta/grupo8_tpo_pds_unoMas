@@ -5,10 +5,13 @@ import org.example.nivel.NivelState;
 import org.example.repository.IPartidoRepository;
 import org.example.state.NecesitamosJugadoresState;
 
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
 public class PartidoService {
     private final IPartidoRepository partidoRepository;
 
@@ -21,7 +24,6 @@ public class PartidoService {
         Partido partido = new Partido(partidoRepository.generarId(), deporte, cantidadJugadores,
                 duracionMinutos, ubicacion, horario);
         partidoRepository.guardar(partido);
-        // Notifica al deporte para que propague a usuarios interesados
         partido.agregarObserver(deporte);
         partido.notificarObservers();
         System.out.println("Partido creado: " + partido);

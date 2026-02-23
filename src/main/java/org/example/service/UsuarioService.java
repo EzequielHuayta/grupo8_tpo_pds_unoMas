@@ -7,8 +7,11 @@ import org.example.model.Usuario;
 import org.example.nivel.NivelState;
 import org.example.repository.IUsuarioRepository;
 
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
+@Service
 public class UsuarioService {
     private final IUsuarioRepository usuarioRepository;
 
