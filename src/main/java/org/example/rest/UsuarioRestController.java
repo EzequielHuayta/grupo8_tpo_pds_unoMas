@@ -6,6 +6,8 @@ import org.example.nivel.Avanzado;
 import org.example.nivel.Intermedio;
 import org.example.nivel.NivelState;
 import org.example.nivel.Principiante;
+import org.example.notification.AdapterJavaEmail;
+import org.example.notification.EmailNotificacionStrategy;
 import org.example.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +21,11 @@ import java.util.stream.Collectors;
 public class UsuarioRestController {
 
     private final UsuarioService usuarioService;
+    private final AdapterJavaEmail adapterEmail;
 
-    public UsuarioRestController(UsuarioService usuarioService) {
+    public UsuarioRestController(UsuarioService usuarioService, AdapterJavaEmail adapterEmail) {
         this.usuarioService = usuarioService;
+        this.adapterEmail = adapterEmail;
     }
 
     // GET /api/usuarios
@@ -57,6 +61,10 @@ public class UsuarioRestController {
 
             Ubicacion ubicacion = new Ubicacion(latitud, longitud, ciudad);
             Usuario usuario = usuarioService.registrarUsuario(nombre, email, contrasena, ubicacion);
+
+            // Automatically wire JavaMail notification strategy to the user's real email
+            usuario.cambiarEstrategiaNotificacion(
+                    new EmailNotificacionStrategy(adapterEmail, usuario.getEmail()));
 
             if (body.containsKey("nivel")) {
                 usuarioService.setNivel(usuario, parseNivel(body.get("nivel").toString()));
