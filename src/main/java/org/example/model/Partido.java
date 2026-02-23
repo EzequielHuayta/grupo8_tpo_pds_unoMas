@@ -24,6 +24,7 @@ public class Partido implements ISubject {
     private NivelState nivelMinimo;
     private NivelState nivelMaximo;
     private List<IObserver> observers;
+    private Long creadorId;   // ID del usuario que creó el partido
 
     public Partido(Long idPartido, Deporte deporte, int cantidadJugadores,
                    int duracionMinutos, Ubicacion ubicacion, LocalDateTime horario) {
@@ -141,6 +142,14 @@ public class Partido implements ISubject {
 
     public List<IObserver> getObservers() {
         return observers;
+    }
+
+    public Long getCreadorId() {
+        return creadorId;
+    }
+
+    public void setCreadorId(Long creadorId) {
+        this.creadorId = creadorId;
     }
 
     @Override

@@ -86,4 +86,8 @@ public class PartidoService {
         return partidoRepository.buscarPorId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Partido no encontrado: " + id));
     }
+
+    public Partido guardar(Partido partido) {
+        return partidoRepository.guardar(partido);
+    }
 }

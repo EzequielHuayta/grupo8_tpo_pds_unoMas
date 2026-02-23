@@ -63,7 +63,9 @@ public class PartidoRepositoryImpl implements IPartidoRepository {
                 String estadoNombre = p[9];
                 int nivelMinPeso    = Integer.parseInt(p[10]);
                 int nivelMaxPeso    = Integer.parseInt(p[11]);
-                String jugadoresData= p.length > 12 ? p[12] : "";
+                // field 12 = creadorId (added later, may be absent in old files)
+                Long creadorId      = p.length > 12 ? Long.parseLong(p[12]) : null;
+                String jugadoresData= p.length > 13 ? p[13] : (p.length > 12 && !p[12].contains(":") ? p[12] : "");
 
                 Deporte deporte = new Deporte(deporteId, deporteNombre);
                 Ubicacion ubicacion = new Ubicacion(lat, lon, ciudad);
@@ -72,6 +74,7 @@ public class PartidoRepositoryImpl implements IPartidoRepository {
                 partido.setEstado(estadoDesde(estadoNombre));
                 partido.setNivelMinimo(nivelDesde(nivelMinPeso));
                 partido.setNivelMaximo(nivelDesde(nivelMaxPeso));
+                partido.setCreadorId(creadorId);
 
                 // Reconstruct jugadores
                 if (!jugadoresData.isEmpty()) {
@@ -125,6 +128,7 @@ public class PartidoRepositoryImpl implements IPartidoRepository {
                         + p.getEstado().getNombre() + "|"
                         + p.getNivelMinimo().getPesoNivel() + "|"
                         + p.getNivelMaximo().getPesoNivel() + "|"
+                        + (p.getCreadorId() != null ? p.getCreadorId() : 0) + "|"
                         + jBuilder.toString());
             }
         } catch (IOException e) {

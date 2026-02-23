@@ -100,6 +100,13 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
     }
 
     @Override
+    public Optional<Usuario> buscarPorNombre(String nombreUsuario) {
+        return usuarios.stream()
+                .filter(u -> u.getNombreUsuario().equalsIgnoreCase(nombreUsuario))
+                .findFirst();
+    }
+
+    @Override
     public List<Usuario> listarTodos() {
         return new ArrayList<>(usuarios);
     }

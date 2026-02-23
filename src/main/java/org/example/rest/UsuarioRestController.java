@@ -90,6 +90,19 @@ public class UsuarioRestController {
         }
     }
 
+    // POST /api/usuarios/login-simple
+    // Body: { "nombreUsuario": "Juan" }  ← no password needed
+    @PostMapping("/login-simple")
+    public ResponseEntity<?> loginSimple(@RequestBody Map<String, Object> body) {
+        try {
+            String nombre = body.get("nombreUsuario").toString();
+            Usuario usuario = usuarioService.loginSinContrasena(nombre);
+            return ResponseEntity.ok(toMap(usuario));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
     // PUT /api/usuarios/{id}/nivel
     // Body: { "nivel": "Avanzado" }
     @PutMapping("/{id}/nivel")

@@ -7,7 +7,6 @@ public class FirebaseNotificacionStrategy implements INotificacionStrategy {
     @Override
     public void notificar(Notificacion notificacion) {
         // Aquí se integraría con Firebase Cloud Messaging
-        System.out.println("[Firebase Push] " + notificacion.getTipo()
-                + ": " + notificacion.getMensaje());
+        System.out.println("[Firebase Push] " + notificacion.getMensaje());
     }
 }

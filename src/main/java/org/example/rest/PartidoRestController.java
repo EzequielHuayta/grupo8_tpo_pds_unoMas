@@ -55,10 +55,6 @@ public class PartidoRestController {
     }
 
     // POST /api/partidos
-    // Body: { "deporteId": 1, "cantidadJugadores": 5, "duracionMinutos": 90,
-    //         "ciudad": "Buenos Aires", "latitud": -34.6, "longitud": -58.38,
-    //         "horario": "2026-02-25T18:00:00",
-    //         "nivelMinimo": "Principiante", "nivelMaximo": "Avanzado" }
     @PostMapping
     public ResponseEntity<?> crearPartido(@RequestBody Map<String, Object> body) {
         try {
@@ -75,13 +71,19 @@ public class PartidoRestController {
             double longitud    = Double.parseDouble(body.get("longitud").toString());
             LocalDateTime horario = LocalDateTime.parse(body.get("horario").toString());
 
-            Ubicacion ubicacion = new Ubicacion(latitud, longitud, ciudad);
+            // creadorId is required – the logged-in user who creates the match
+            Long creadorId = body.containsKey("creadorId")
+                    ? Long.valueOf(body.get("creadorId").toString()) : null;
 
+            Ubicacion ubicacion = new Ubicacion(latitud, longitud, ciudad);
             NivelState nivelMin = parseNivel(body.getOrDefault("nivelMinimo", "Principiante").toString());
             NivelState nivelMax = parseNivel(body.getOrDefault("nivelMaximo", "Avanzado").toString());
 
             Partido partido = partidoService.crearPartido(deporte, cantJugadores, duracion,
                     ubicacion, horario, nivelMin, nivelMax);
+            partido.setCreadorId(creadorId);
+            // persist the creadorId
+            partidoService.guardar(partido);
 
             return ResponseEntity.ok(toMap(partido));
         } catch (Exception e) {
@@ -115,37 +117,49 @@ public class PartidoRestController {
         }
     }
 
-    // PUT /api/partidos/{id}/iniciar
+    // PUT /api/partidos/{id}/iniciar?creadorId=1
     @PutMapping("/{id}/iniciar")
-    public ResponseEntity<?> iniciarPartido(@PathVariable Long id) {
+    public ResponseEntity<?> iniciarPartido(@PathVariable Long id,
+                                             @RequestParam(required = false) Long creadorId) {
         try {
             Partido partido = partidoService.buscarPorId(id);
+            verificarPropietario(partido, creadorId);
             partidoService.iniciarPartido(partido);
             return ResponseEntity.ok(toMap(partido));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(Collections.singletonMap("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         }
     }
 
-    // PUT /api/partidos/{id}/finalizar
+    // PUT /api/partidos/{id}/finalizar?creadorId=1
     @PutMapping("/{id}/finalizar")
-    public ResponseEntity<?> finalizarPartido(@PathVariable Long id) {
+    public ResponseEntity<?> finalizarPartido(@PathVariable Long id,
+                                               @RequestParam(required = false) Long creadorId) {
         try {
             Partido partido = partidoService.buscarPorId(id);
+            verificarPropietario(partido, creadorId);
             partidoService.finalizarPartido(partido);
             return ResponseEntity.ok(toMap(partido));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(Collections.singletonMap("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         }
     }
 
-    // PUT /api/partidos/{id}/cancelar
+    // PUT /api/partidos/{id}/cancelar?creadorId=1
     @PutMapping("/{id}/cancelar")
-    public ResponseEntity<?> cancelarPartido(@PathVariable Long id) {
+    public ResponseEntity<?> cancelarPartido(@PathVariable Long id,
+                                              @RequestParam(required = false) Long creadorId) {
         try {
             Partido partido = partidoService.buscarPorId(id);
+            verificarPropietario(partido, creadorId);
             partidoService.cancelarPartido(partido);
             return ResponseEntity.ok(toMap(partido));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403).body(Collections.singletonMap("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         }
@@ -191,6 +205,7 @@ public class PartidoRestController {
             jugadores.add(jm);
         }
         m.put("jugadores", jugadores);
+        m.put("creadorId", p.getCreadorId());  // needed by frontend for owner check
         return m;
     }
 
@@ -199,6 +214,19 @@ public class PartidoRestController {
             case "intermedio": return new Intermedio();
             case "avanzado":   return new Avanzado();
             default:           return new Principiante();
+        }
+    }
+
+    /**
+     * Throws SecurityException if the requesting user is not the match creator.
+     * If creadorId is missing or the match has no creator set, access is allowed
+     * (to avoid locking out matches created before this feature was added).
+     */
+    private void verificarPropietario(Partido partido, Long creadorId) {
+        Long owner = partido.getCreadorId();
+        if (owner == null || owner == 0 || creadorId == null) return; // no owner set → open
+        if (!owner.equals(creadorId)) {
+            throw new SecurityException("Solo el creador del partido puede realizar esta acción.");
         }
     }
 }

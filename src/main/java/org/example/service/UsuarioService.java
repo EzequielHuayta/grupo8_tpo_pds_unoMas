@@ -33,6 +33,12 @@ public class UsuarioService {
                 .orElseThrow(() -> new IllegalArgumentException("Credenciales inválidas."));
     }
 
+    /** Login sin contraseña: solo por nombre de usuario */
+    public Usuario loginSinContrasena(String nombreUsuario) {
+        return usuarioRepository.buscarPorNombre(nombreUsuario)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado: " + nombreUsuario));
+    }
+
     public void setDeporteFavorito(Usuario usuario, Deporte deporte) {
         usuario.setDeporteFavorito(deporte);
         deporte.agregarUsuario(usuario);
