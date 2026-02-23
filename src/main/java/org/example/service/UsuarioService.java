@@ -1,6 +1,7 @@
 package org.example.service;
 
 import org.example.model.Deporte;
+import org.example.model.Partido;
 import org.example.model.Ubicacion;
 import org.example.model.Usuario;
 import org.example.nivel.NivelState;
@@ -42,6 +43,11 @@ public class UsuarioService {
 
     public List<Usuario> getUsuarios() {
         return usuarioRepository.listarTodos();
+    }
+
+    public void guardarPartido(Usuario usuario, Partido partido) {
+        usuario.agregarPartidoAlHistorial(partido);
+        System.out.println("Partido #" + partido.getIdPartido() + " guardado en historial de " + usuario.getNombreUsuario());
     }
 
     public Usuario buscarPorId(Long id) {

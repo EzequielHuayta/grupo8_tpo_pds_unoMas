@@ -1,6 +1,7 @@
 package org.example.controller;
 
 import org.example.model.Deporte;
+import org.example.model.Partido;
 import org.example.model.Ubicacion;
 import org.example.model.Usuario;
 import org.example.nivel.NivelState;
@@ -28,5 +29,9 @@ public class UsuarioController {
 
     public void setNivel(Usuario usuario, NivelState nivel) {
         usuarioService.setNivel(usuario, nivel);
+    }
+
+    public void guardarPartido(Usuario usuario, Partido partido) {
+        usuarioService.guardarPartido(usuario, partido);
     }
 }

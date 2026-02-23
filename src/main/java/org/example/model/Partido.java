@@ -1,6 +1,5 @@
 package org.example.model;
 
-import org.example.enums.TipoNotificacion;
 import org.example.nivel.NivelState;
 import org.example.nivel.Principiante;
 import org.example.nivel.Avanzado;
@@ -56,28 +55,11 @@ public class Partido implements ISubject {
 
     @Override
     public void notificarObservers() {
-        TipoNotificacion tipo = mapEstadoATipo();
-        Notificacion notificacion = new Notificacion(
-                "Partido #" + idPartido + " de " + deporte.getNombre()
-                        + " cambió a estado: " + estado.getNombre(),
-                tipo,
-                idPartido
-        );
+        String mensaje = "Partido #" + idPartido + " de " + deporte.getNombre()
+                + " - Estado: " + estado.getNombre();
+        Notificacion notificacion = new Notificacion(mensaje);
         for (IObserver observer : observers) {
             observer.recibirNotificacion(notificacion);
-        }
-    }
-
-    private TipoNotificacion mapEstadoATipo() {
-        String nombre = estado.getNombre();
-        switch (nombre) {
-            case "Necesitamos jugadores": return TipoNotificacion.PARTIDO_NUEVO;
-            case "Partido armado": return TipoNotificacion.PARTIDO_ARMADO;
-            case "Confirmado": return TipoNotificacion.PARTIDO_CONFIRMADO;
-            case "En juego": return TipoNotificacion.PARTIDO_EN_JUEGO;
-            case "Finalizado": return TipoNotificacion.PARTIDO_FINALIZADO;
-            case "Cancelado": return TipoNotificacion.PARTIDO_CANCELADO;
-            default: return TipoNotificacion.PARTIDO_NUEVO;
         }
     }
 
