@@ -14,19 +14,20 @@ async function req(path, options = {}) {
 
 export const api = {
   // Partidos
-  getPartidos:       ()           => req('/partidos'),
-  getPartido:        (id)         => req(`/partidos/${id}`),
-  crearPartido:      (body)       => req('/partidos', { method: 'POST', body: JSON.stringify(body) }),
-  agregarJugador:    (id, uid)    => req(`/partidos/${id}/jugadores/${uid}`, { method: 'POST' }),
-  confirmarJugador:  (id, uid)    => req(`/partidos/${id}/confirmar-jugador/${uid}`, { method: 'PUT' }),
-  iniciarPartido:    (id)         => req(`/partidos/${id}/iniciar`, { method: 'PUT' }),
-  finalizarPartido:  (id)         => req(`/partidos/${id}/finalizar`, { method: 'PUT' }),
-  cancelarPartido:   (id)         => req(`/partidos/${id}/cancelar`, { method: 'PUT' }),
-  getDeportes:       ()           => req('/partidos/deportes'),
+  getPartidos: () => req('/partidos'),
+  getPartido: (id) => req(`/partidos/${id}`),
+  crearPartido: (body) => req('/partidos', { method: 'POST', body: JSON.stringify(body) }),
+  agregarJugador: (id, uid) => req(`/partidos/${id}/jugadores/${uid}`, { method: 'POST' }),
+  confirmarJugador: (id, uid) => req(`/partidos/${id}/confirmar-jugador/${uid}`, { method: 'PUT' }),
+  iniciarPartido: (id, creadorId) => req(`/partidos/${id}/iniciar${creadorId ? `?creadorId=${creadorId}` : ''}`, { method: 'PUT' }),
+  finalizarPartido: (id, creadorId) => req(`/partidos/${id}/finalizar${creadorId ? `?creadorId=${creadorId}` : ''}`, { method: 'PUT' }),
+  cancelarPartido: (id, creadorId) => req(`/partidos/${id}/cancelar${creadorId ? `?creadorId=${creadorId}` : ''}`, { method: 'PUT' }),
+  getDeportes: () => req('/partidos/deportes'),
 
   // Usuarios
-  getUsuarios:       ()           => req('/usuarios'),
-  registrarUsuario:  (body)       => req('/usuarios/registro', { method: 'POST', body: JSON.stringify(body) }),
-  login:             (body)       => req('/usuarios/login', { method: 'POST', body: JSON.stringify(body) }),
-  cambiarNivel:      (id, nivel)  => req(`/usuarios/${id}/nivel`, { method: 'PUT', body: JSON.stringify({ nivel }) }),
+  getUsuarios: () => req('/usuarios'),
+  registrarUsuario: (body) => req('/usuarios/registro', { method: 'POST', body: JSON.stringify(body) }),
+  login: (body) => req('/usuarios/login', { method: 'POST', body: JSON.stringify(body) }),
+  loginSimple: (nombre) => req('/usuarios/login-simple', { method: 'POST', body: JSON.stringify({ nombreUsuario: nombre }) }),
+  cambiarNivel: (id, nivel) => req(`/usuarios/${id}/nivel`, { method: 'PUT', body: JSON.stringify({ nivel }) }),
 };

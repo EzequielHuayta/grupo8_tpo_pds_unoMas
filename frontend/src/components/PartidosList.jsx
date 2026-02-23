@@ -4,19 +4,23 @@ import { estadoBadge } from '../utils';
 import { SPORT_ICONS } from '../App';
 import CreatePartidoModal from './CreatePartidoModal';
 
-export default function PartidosList({ partidos, usuarios, deportes, onRefresh, toast }) {
+export default function PartidosList({ partidos, usuarios, deportes, currentUser, onLoginRequired, onRefresh, toast }) {
     const [showCreate, setShowCreate] = useState(false);
     const [expanded, setExpanded] = useState(null);
     const [filterEstado, setFilterEstado] = useState('Todos');
 
     const ESTADOS = ['Todos', 'Necesitamos jugadores', 'Partido armado', 'Confirmado', 'En juego', 'Finalizado', 'Cancelado'];
-
     const filtered = filterEstado === 'Todos' ? partidos : partidos.filter(p => p.estado === filterEstado);
 
-    const doAction = async (action, id, extra) => {
-        try { await action(id, extra); await onRefresh(); toast('ACCIÓN REALIZADA'); }
+    // Generic action gated on login
+    const doAction = async (fn) => {
+        if (!currentUser) { onLoginRequired(); return; }
+        try { await fn(); await onRefresh(); toast('ACCIÓN REALIZADA'); }
         catch (e) { toast(e.message, 'error'); }
     };
+
+    // Is the logged-in user the creator of this match?
+    const isOwner = (p) => currentUser && p.creadorId && Number(p.creadorId) === Number(currentUser.id);
 
     return (
         <div>
@@ -25,7 +29,10 @@ export default function PartidosList({ partidos, usuarios, deportes, onRefresh, 
                     <div className="section-label">Calendario</div>
                     <div className="section-title">Partidos ({filtered.length})</div>
                 </div>
-                <button className="btn btn-primary" onClick={() => setShowCreate(true)}>+ NUEVO PARTIDO</button>
+                <button className="btn btn-primary" onClick={() => {
+                    if (!currentUser) { onLoginRequired(); return; }
+                    setShowCreate(true);
+                }}>+ NUEVO PARTIDO</button>
             </div>
 
             {/* Filter bar */}
@@ -48,9 +55,12 @@ export default function PartidosList({ partidos, usuarios, deportes, onRefresh, 
                                 <span style={{ fontFamily: "'Barlow Condensed'", fontWeight: 800, fontSize: '.9rem' }}>
                                     {SPORT_ICONS[p.deporte] || '🏟'} {p.deporte.toUpperCase()} · #{p.id}
                                 </span>
-                                <span className={`badge ${p.estado === 'En juego' ? 'badge-live' : estadoBadge(p.estado)}`}>
-                                    {p.estado === 'En juego' ? '● LIVE' : p.estado.toUpperCase()}
-                                </span>
+                                <div style={{ display: 'flex', gap: '.35rem', alignItems: 'center' }}>
+                                    {isOwner(p) && <span style={{ fontSize: '.65rem', color: 'var(--gold)', fontFamily: "'Barlow Condensed'", fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.05em' }}>👑 TUYO</span>}
+                                    <span className={`badge ${p.estado === 'En juego' ? 'badge-live' : estadoBadge(p.estado)}`}>
+                                        {p.estado === 'En juego' ? '● LIVE' : p.estado.toUpperCase()}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Score body */}
@@ -88,11 +98,11 @@ export default function PartidosList({ partidos, usuarios, deportes, onRefresh, 
                                                     <span className={`badge ${j.confirmado ? 'badge-green' : 'badge-yellow'}`}>
                                                         {j.confirmado ? '✓ OK' : 'PENDIENTE'}
                                                     </span>
-                                                    {!j.confirmado && p.estado === 'Partido armado' && (
+                                                    {isOwner(p) && !j.confirmado && p.estado === 'Partido armado' && (
                                                         <button className="btn btn-gold btn-sm"
                                                             onClick={() => {
                                                                 const u = usuarios.find(u => u.nombreUsuario === j.nombre);
-                                                                if (u) doAction(api.confirmarJugador, p.id, u.id);
+                                                                if (u) doAction(() => api.confirmarJugador(p.id, u.id));
                                                             }}>CONFIRMAR</button>
                                                     )}
                                                 </div>
@@ -102,25 +112,36 @@ export default function PartidosList({ partidos, usuarios, deportes, onRefresh, 
                                 </div>
                             )}
 
-                            {/* Actions */}
+                            {/* Actions — owner-only for state transitions */}
                             <div className="score-card-actions">
                                 {p.estado === 'Necesitamos jugadores' && usuarios.length > 0 && (
                                     <select className="form-control" style={{ fontSize: '.78rem', padding: '.3rem .5rem', flex: 1 }}
                                         defaultValue=""
-                                        onChange={e => { if (e.target.value) doAction(api.agregarJugador, p.id, e.target.value); e.target.value = ''; }}>
+                                        onChange={e => {
+                                            if (e.target.value) doAction(() => api.agregarJugador(p.id, e.target.value));
+                                            e.target.value = '';
+                                        }}>
                                         <option value="" disabled>+ AGREGAR JUGADOR</option>
                                         {usuarios.filter(u => !p.jugadores.some(j => j.nombre === u.nombreUsuario))
                                             .map(u => <option key={u.id} value={u.id}>{u.nombreUsuario}</option>)}
                                     </select>
                                 )}
-                                {p.estado === 'Confirmado' && (
-                                    <button className="btn btn-success btn-sm" onClick={() => doAction(api.iniciarPartido, p.id)}>▶ INICIAR</button>
+                                {isOwner(p) && p.estado === 'Confirmado' && (
+                                    <button className="btn btn-success btn-sm"
+                                        onClick={() => doAction(() => api.iniciarPartido(p.id, currentUser.id))}>▶ INICIAR</button>
                                 )}
-                                {p.estado === 'En juego' && (
-                                    <button className="btn btn-info btn-sm" onClick={() => doAction(api.finalizarPartido, p.id)}>⏹ FINALIZAR</button>
+                                {isOwner(p) && p.estado === 'En juego' && (
+                                    <button className="btn btn-info btn-sm"
+                                        onClick={() => doAction(() => api.finalizarPartido(p.id, currentUser.id))}>⏹ FINALIZAR</button>
                                 )}
-                                {['Necesitamos jugadores', 'Partido armado', 'Confirmado'].includes(p.estado) && (
-                                    <button className="btn btn-danger btn-sm" onClick={() => doAction(api.cancelarPartido, p.id)}>✕ CANCELAR</button>
+                                {isOwner(p) && ['Necesitamos jugadores', 'Partido armado', 'Confirmado'].includes(p.estado) && (
+                                    <button className="btn btn-danger btn-sm"
+                                        onClick={() => doAction(() => api.cancelarPartido(p.id, currentUser.id))}>✕ CANCELAR</button>
+                                )}
+                                {!isOwner(p) && p.creadorId && currentUser && !['Finalizado', 'Cancelado'].includes(p.estado) && (
+                                    <span style={{ fontSize: '.72rem', color: 'var(--muted)', fontFamily: "'Barlow Condensed'", textTransform: 'uppercase' }}>
+                                        Solo el 👑 creador puede gestionar
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -130,6 +151,7 @@ export default function PartidosList({ partidos, usuarios, deportes, onRefresh, 
 
             {showCreate && (
                 <CreatePartidoModal deportes={deportes}
+                    currentUser={currentUser}
                     onClose={() => setShowCreate(false)}
                     onCreated={() => { setShowCreate(false); onRefresh(); toast('PARTIDO CREADO'); }}
                     toast={toast} />

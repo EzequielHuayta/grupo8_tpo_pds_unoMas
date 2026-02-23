@@ -8,7 +8,7 @@ const DEFAULT = {
     horario: '', nivelMinimo: 'Principiante', nivelMaximo: 'Avanzado',
 };
 
-export default function CreatePartidoModal({ deportes, onClose, onCreated, toast }) {
+export default function CreatePartidoModal({ deportes, currentUser, onClose, onCreated, toast }) {
     const [form, setForm] = useState(DEFAULT);
     const [loading, setLoading] = useState(false);
 
@@ -29,6 +29,7 @@ export default function CreatePartidoModal({ deportes, onClose, onCreated, toast
                 duracionMinutos: Number(form.duracionMinutos),
                 latitud: Number(form.latitud) || 0,
                 longitud: Number(form.longitud) || 0,
+                creadorId: currentUser ? currentUser.id : null,
             });
             onCreated();
         } catch (e) {
@@ -41,7 +42,7 @@ export default function CreatePartidoModal({ deportes, onClose, onCreated, toast
     return (
         <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
             <div className="modal">
-                <div className="modal-title">🏟️ Nuevo partido</div>
+                <div className="modal-title">🏟 NUEVO PARTIDO</div>
                 <form onSubmit={submit}>
                     <div className="form-group">
                         <label className="form-label">Deporte *</label>
