@@ -183,6 +183,18 @@ export default function App() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Auto-refresh partidos & usuarios every 10s so backend state changes show up
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const [p, u] = await Promise.all([api.getPartidos(), api.getUsuarios()]);
+        setPartidos(p);
+        setUsuarios(u);
+      } catch { /* servidor no disponible, silenciar */ }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleLogin = (user) => {
     setCurrentUser(user);
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));
