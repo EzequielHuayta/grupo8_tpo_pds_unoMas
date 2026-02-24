@@ -213,6 +213,19 @@ public class PartidoController {
                     .filter(p -> p.getCreadorId() == null || !p.getCreadorId().equals(usuarioId))
                     .collect(java.util.stream.Collectors.toList());
 
+            // --- DEBUG ---
+            System.out.println("[buscarPartidos] usuarioId=" + usuarioId
+                    + " estrategia=" + estrategia
+                    + " barrio=" + (usuario.getUbicacion() != null ? usuario.getUbicacion().getBarrio() : "NULL")
+                    + " nivel=" + usuario.getNivel().getNombre()
+                    + " disponibles=" + disponibles.size());
+            disponibles.forEach(p -> System.out.println(
+                    "  → Partido #" + p.getIdPartido()
+                    + " barrio=[" + (p.getUbicacion() != null ? p.getUbicacion().getBarrio() : "NULL") + "]"
+                    + " nivelMin=" + p.getNivelMinimo().getNombre()
+                    + " nivelMax=" + p.getNivelMaximo().getNombre()));
+            // --- FIN DEBUG ---
+
             // Seleccionar estrategia
             IEmparejadorStrategy strategy;
             switch (estrategia.toUpperCase()) {

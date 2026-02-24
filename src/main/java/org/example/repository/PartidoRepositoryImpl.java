@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class PartidoRepositoryImpl implements IPartidoRepository {
         File file = new File(FILE_PATH);
         if (!file.exists()) return;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
@@ -102,7 +103,7 @@ public class PartidoRepositoryImpl implements IPartidoRepository {
 
     private void persistir() {
         new File("data").mkdirs();
-        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_PATH))) {
+        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(FILE_PATH), StandardCharsets.UTF_8))) {
             for (Partido p : partidos) {
                 // build jugadores string
                 StringBuilder jBuilder = new StringBuilder();
