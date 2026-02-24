@@ -5,7 +5,7 @@ import { nivelBadge, initials } from '../utils';
 const DEFAULT = { nombreUsuario: '', email: '', contrasena: '', barrio: '', nivel: 'Principiante' };
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado'];
 
-export default function UsuariosList({ usuarios, partidos, barrios, onRefresh, toast }) {
+export default function UsuariosList({ usuarios, partidos, barrios, currentUser, onRefresh, toast }) {
     const [showRegister, setShowRegister] = useState(false);
     const [form, setForm] = useState(DEFAULT);
     const [loading, setLoading] = useState(false);
@@ -46,26 +46,39 @@ export default function UsuariosList({ usuarios, partidos, barrios, onRefresh, t
                 ? <div className="empty">— SIN JUGADORES AÚN —</div>
                 : <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                     {/* Table header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 120px 100px', gap: '.75rem', padding: '.4rem .75rem', fontSize: '.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', borderBottom: '2px solid var(--red)' }}>
-                        <span>#</span><span></span><span>JUGADOR</span><span>BARRIO</span><span>NIVEL</span><span>CAMBIAR</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 70px 120px 100px', gap: '.75rem', padding: '.4rem .75rem', fontSize: '.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', borderBottom: '2px solid var(--red)' }}>
+                        <span>#</span><span></span><span>JUGADOR</span><span>BARRIO</span><span>PARTIDOS</span><span>NIVEL</span><span>CAMBIAR</span>
                     </div>
-                    {usuarios.map((u, i) => (
-                        <div key={u.id} className="usuario-row" style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 120px 100px', gap: '.75rem', alignItems: 'center' }}>
-                            <span className="number">{i + 1}</span>
-                            <div className="avatar">{initials(u.nombreUsuario)}</div>
-                            <div>
-                                <div className="usuario-name">{u.nombreUsuario}</div>
-                                <div className="usuario-meta">{u.email}</div>
+                    {usuarios.map((u, i) => {
+                        const partidosCount = partidos.filter(p =>
+                            (p.creadorId && Number(p.creadorId) === Number(u.id)) ||
+                            (p.jugadores && p.jugadores.some(j => j.nombre === u.nombreUsuario))
+                        ).length;
+                        const esMiPerfil = currentUser && Number(currentUser.id) === Number(u.id);
+                        return (
+                            <div key={u.id} className="usuario-row" style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 70px 120px 100px', gap: '.75rem', alignItems: 'center' }}>
+                                <span className="number">{i + 1}</span>
+                                <div className="avatar">{initials(u.nombreUsuario)}</div>
+                                <div>
+                                    <div className="usuario-name">{u.nombreUsuario}</div>
+                                    <div className="usuario-meta">{u.email}</div>
+                                </div>
+                                <div className="usuario-meta">📍 {u.barrio || '—'}</div>
+                                <span style={{ fontFamily: "'Barlow Condensed'", fontWeight: 700, fontSize: '.95rem', color: 'var(--text)', textAlign: 'center' }}>
+                                    {partidosCount}
+                                </span>
+                                <span className={`badge ${nivelBadge(u.nivel)}`}>{u.nivel.toUpperCase()}</span>
+                                {esMiPerfil
+                                    ? <select className="form-control" style={{ fontSize: '.75rem', padding: '.25rem .4rem' }}
+                                        value={u.nivel}
+                                        onChange={e => cambiarNivel(u.id, e.target.value)}>
+                                        {NIVELES.map(n => <option key={n}>{n}</option>)}
+                                    </select>
+                                    : <span style={{ fontSize: '.75rem', color: 'var(--muted)', textAlign: 'center' }}>—</span>
+                                }
                             </div>
-                            <div className="usuario-meta">📍 {u.barrio || '—'}</div>
-                            <span className={`badge ${nivelBadge(u.nivel)}`}>{u.nivel.toUpperCase()}</span>
-                            <select className="form-control" style={{ fontSize: '.75rem', padding: '.25rem .4rem' }}
-                                value={u.nivel}
-                                onChange={e => cambiarNivel(u.id, e.target.value)}>
-                                {NIVELES.map(n => <option key={n}>{n}</option>)}
-                            </select>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             }
 

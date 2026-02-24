@@ -122,7 +122,7 @@ export default function App() {
             onRefresh={load} toast={toast}
           />}
         {!loading && page === 'usuarios' &&
-          <UsuariosList usuarios={usuarios} partidos={partidos} barrios={barrios} onRefresh={load} toast={toast} />}
+          <UsuariosList usuarios={usuarios} partidos={partidos} barrios={barrios} currentUser={currentUser} onRefresh={load} toast={toast} />}
       </main>
 
       {showLogin && (
