@@ -2,28 +2,19 @@ package org.example.state;
 
 import org.example.model.Partido;
 
+/**
+ * Estado: todos los jugadores confirmaron, el partido está listo para jugarse.
+ * Transiciones:
+ * - avanzar() → EnJuegoState
+ * - cancelar() → CanceladoState
+ */
 public class ConfirmadoState implements IPartidoState {
 
     @Override
-    public void agregarJugador(Partido partido) {
-        throw new IllegalStateException("No se pueden agregar jugadores: el partido está confirmado.");
-    }
-
-    @Override
-    public void confirmar(Partido partido) {
-        throw new IllegalStateException("El partido ya está confirmado.");
-    }
-
-    @Override
-    public void iniciar(Partido partido) {
+    public void avanzar(Partido partido) {
         partido.setEstado(new EnJuegoState());
         System.out.println("Partido #" + partido.getIdPartido() + " → En juego");
         partido.notificarObservers();
-    }
-
-    @Override
-    public void finalizar(Partido partido) {
-        throw new IllegalStateException("No se puede finalizar: el partido no está en juego.");
     }
 
     @Override

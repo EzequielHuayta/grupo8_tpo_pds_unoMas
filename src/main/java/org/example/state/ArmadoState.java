@@ -3,15 +3,21 @@ package org.example.state;
 import org.example.model.Jugador;
 import org.example.model.Partido;
 
+/**
+ * Estado: el partido tiene todos sus jugadores pero aún no todos confirmaron.
+ * Transiciones:
+ * - avanzar() → ConfirmadoState (cuando todos los jugadores confirmaron
+ * asistencia)
+ * - cancelar() → CanceladoState
+ */
 public class ArmadoState implements IPartidoState {
 
+    /**
+     * Avanza a Confirmado si todos los jugadores confirmaron su asistencia.
+     * Si aún faltan confirmaciones, no cambia el estado.
+     */
     @Override
-    public void agregarJugador(Partido partido) {
-        throw new IllegalStateException("El partido ya tiene todos los jugadores.");
-    }
-
-    @Override
-    public void confirmar(Partido partido) {
+    public void avanzar(Partido partido) {
         boolean todosConfirmados = partido.getJugadores().stream()
                 .allMatch(Jugador::isConfirmacion);
         if (todosConfirmados) {
@@ -19,18 +25,9 @@ public class ArmadoState implements IPartidoState {
             System.out.println("Partido #" + partido.getIdPartido() + " → Confirmado");
             partido.notificarObservers();
         } else {
-            System.out.println("Aún faltan jugadores por confirmar.");
+            System.out.println("Partido #" + partido.getIdPartido()
+                    + ": aún faltan jugadores por confirmar.");
         }
-    }
-
-    @Override
-    public void iniciar(Partido partido) {
-        throw new IllegalStateException("No se puede iniciar: el partido no está confirmado.");
-    }
-
-    @Override
-    public void finalizar(Partido partido) {
-        throw new IllegalStateException("No se puede finalizar: el partido no está en juego.");
     }
 
     @Override

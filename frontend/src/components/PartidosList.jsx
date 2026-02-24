@@ -173,7 +173,7 @@ export default function PartidosList({ partidos, usuarios, deportes, barrios, cu
                                     <button className="btn btn-info btn-sm"
                                         onClick={() => doAction(() => api.finalizarPartido(p.id, currentUser.id))}>⏹ FINALIZAR</button>
                                 )}
-                                {isOwner(p) && ['Necesitamos jugadores', 'Partido armado', 'Confirmado'].includes(p.estado) && (
+                                {isOwner(p) && ['Necesitamos jugadores', 'Partido armado', 'Confirmado', 'En juego'].includes(p.estado) && (
                                     <button className="btn btn-danger btn-sm"
                                         onClick={() => doAction(() => api.cancelarPartido(p.id, currentUser.id))}>✕ CANCELAR</button>
                                 )}

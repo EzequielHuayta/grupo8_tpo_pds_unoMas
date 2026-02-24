@@ -1,33 +1,13 @@
 package org.example.state;
 
-import org.example.model.Partido;
-
+/**
+ * Estado terminal: el partido ya finalizó. No acepta más transiciones.
+ * Hereda los default methods de IPartidoState que lanzan IllegalStateException.
+ */
 public class FinalizadoState implements IPartidoState {
 
-    @Override
-    public void agregarJugador(Partido partido) {
-        throw new IllegalStateException("No se pueden agregar jugadores: el partido finalizó.");
-    }
-
-    @Override
-    public void confirmar(Partido partido) {
-        throw new IllegalStateException("No se puede confirmar: el partido finalizó.");
-    }
-
-    @Override
-    public void iniciar(Partido partido) {
-        throw new IllegalStateException("No se puede iniciar: el partido finalizó.");
-    }
-
-    @Override
-    public void finalizar(Partido partido) {
-        throw new IllegalStateException("El partido ya finalizó.");
-    }
-
-    @Override
-    public void cancelar(Partido partido) {
-        throw new IllegalStateException("No se puede cancelar: el partido ya finalizó.");
-    }
+    // avanzar() y cancelar() usan el default de la interfaz → lanzan
+    // IllegalStateException
 
     @Override
     public String getNombre() {

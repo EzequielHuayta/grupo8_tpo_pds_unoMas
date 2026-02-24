@@ -27,7 +27,7 @@ public class Partido implements ISubject {
     private Long creadorId;
 
     public Partido(Long idPartido, Deporte deporte, int cantidadJugadores,
-                   int duracionMinutos, Ubicacion ubicacion, LocalDateTime horario) {
+            int duracionMinutos, Ubicacion ubicacion, LocalDateTime horario) {
         this.idPartido = idPartido;
         this.deporte = deporte;
         this.cantidadJugadores = cantidadJugadores;
@@ -64,23 +64,43 @@ public class Partido implements ISubject {
         }
     }
 
-    // Métodos que delegan al estado
+    // -------------------------------------------------------------------------
+    // Métodos que delegan al estado (Context → State)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Agrega un jugador al partido (lógica de negocio en el Context).
+     * Luego invoca avanzar() para que el estado actual decida si
+     * corresponde transicionar a Armado cuando se completa el cupo.
+     */
     public void agregarJugador(Jugador jugador) {
         jugadores.add(jugador);
         agregarObserver(jugador.getJugador());
-        estado.agregarJugador(this);
+        estado.avanzar(this); // NecesitamosJugadoresState evaluará si pasamos a Armado
     }
 
+    /**
+     * Intenta avanzar al siguiente estado lógico.
+     * Usado por: confirmar asistencia (Armado→Confirmado) e iniciar partido
+     * (Confirmado→EnJuego).
+     */
+    public void avanzar() {
+        estado.avanzar(this);
+    }
+
+    /** Alias semántico para confirmar todos los jugadores → Confirmado. */
     public void confirmar() {
-        estado.confirmar(this);
+        estado.avanzar(this);
     }
 
+    /** Alias semántico para iniciar el partido → EnJuego. */
     public void iniciar() {
-        estado.iniciar(this);
+        estado.avanzar(this);
     }
 
+    /** Alias semántico para finalizar el partido → Finalizado. */
     public void finalizar() {
-        estado.finalizar(this);
+        estado.avanzar(this);
     }
 
     public void cancelar() {

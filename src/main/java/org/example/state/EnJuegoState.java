@@ -2,25 +2,17 @@ package org.example.state;
 
 import org.example.model.Partido;
 
+/**
+ * Estado: el partido está actualmente en curso.
+ * Transiciones:
+ * - avanzar() → FinalizadoState
+ * - cancelar() → CanceladoState [BUG FIX: antes tiraba exception, ahora es una
+ * transición válida]
+ */
 public class EnJuegoState implements IPartidoState {
 
     @Override
-    public void agregarJugador(Partido partido) {
-        throw new IllegalStateException("No se pueden agregar jugadores: el partido está en juego.");
-    }
-
-    @Override
-    public void confirmar(Partido partido) {
-        throw new IllegalStateException("No se puede confirmar: el partido está en juego.");
-    }
-
-    @Override
-    public void iniciar(Partido partido) {
-        throw new IllegalStateException("El partido ya está en juego.");
-    }
-
-    @Override
-    public void finalizar(Partido partido) {
+    public void avanzar(Partido partido) {
         partido.setEstado(new FinalizadoState());
         System.out.println("Partido #" + partido.getIdPartido() + " → Finalizado");
         partido.notificarObservers();
@@ -28,7 +20,9 @@ public class EnJuegoState implements IPartidoState {
 
     @Override
     public void cancelar(Partido partido) {
-        throw new IllegalStateException("No se puede cancelar: el partido está en juego.");
+        partido.setEstado(new CanceladoState());
+        System.out.println("Partido #" + partido.getIdPartido() + " → Cancelado");
+        partido.notificarObservers();
     }
 
     @Override

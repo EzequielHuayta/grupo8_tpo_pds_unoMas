@@ -2,31 +2,29 @@ package org.example.state;
 
 import org.example.model.Partido;
 
+/**
+ * Estado: el partido fue creado pero aún no tiene todos los jugadores.
+ * Transiciones:
+ * - avanzar() → ArmadoState (cuando se llena el cupo de jugadores)
+ * - cancelar() → CanceladoState
+ */
 public class NecesitamosJugadoresState implements IPartidoState {
 
+    /**
+     * Avanza al estado Armado si se completó el cupo de jugadores.
+     * Si aún faltan jugadores, no cambia el estado pero lo reporta.
+     */
     @Override
-    public void agregarJugador(Partido partido) {
-        System.out.println("Jugador agregado al partido #" + partido.getIdPartido());
+    public void avanzar(Partido partido) {
         if (partido.getJugadores().size() >= partido.getCantidadJugadores()) {
             partido.setEstado(new ArmadoState());
             System.out.println("Partido #" + partido.getIdPartido() + " → Armado");
             partido.notificarObservers();
+        } else {
+            System.out.println("Partido #" + partido.getIdPartido()
+                    + ": aún faltan jugadores ("
+                    + partido.getJugadores().size() + "/" + partido.getCantidadJugadores() + ")");
         }
-    }
-
-    @Override
-    public void confirmar(Partido partido) {
-        throw new IllegalStateException("No se puede confirmar: faltan jugadores.");
-    }
-
-    @Override
-    public void iniciar(Partido partido) {
-        throw new IllegalStateException("No se puede iniciar: faltan jugadores.");
-    }
-
-    @Override
-    public void finalizar(Partido partido) {
-        throw new IllegalStateException("No se puede finalizar: faltan jugadores.");
     }
 
     @Override
