@@ -6,6 +6,7 @@ import PartidosList from './components/PartidosList';
 import UsuariosList from './components/UsuariosList';
 import Dashboard from './components/Dashboard';
 import LoginModal from './components/LoginModal';
+import BuscarPartidos from './components/BuscarPartidos';
 
 export const SPORT_ICONS = { 'Fútbol': '⚽', 'Básquet': '🏀', 'Tenis': '🎾', 'Vóley': '🏐', 'Paddle': '🏓' };
 
@@ -67,7 +68,7 @@ export default function App() {
         <span className="logo">UNO<span>MÁS</span></span>
 
         <nav className="nav">
-          {[['dashboard', 'INICIO'], ['partidos', 'PARTIDOS'], ['usuarios', 'JUGADORES']].map(([id, label]) => (
+          {[['dashboard', 'INICIO'], ['buscar', 'BUSCAR'], ['partidos', 'PARTIDOS'], ['usuarios', 'JUGADORES']].map(([id, label]) => (
             <button key={id} className={`nav-btn${page === id ? ' active' : ''}`} onClick={() => setPage(id)}>{label}</button>
           ))}
         </nav>
@@ -105,6 +106,13 @@ export default function App() {
         {loading && <div className="spinner" />}
         {!loading && page === 'dashboard' &&
           <Dashboard partidos={partidos} usuarios={usuarios} onNavigate={setPage} />}
+        {!loading && page === 'buscar' &&
+          <BuscarPartidos
+            currentUser={currentUser}
+            onLoginRequired={() => setShowLogin(true)}
+            onRefresh={load}
+            toast={toast}
+          />}
         {!loading && page === 'partidos' &&
           <PartidosList
             partidos={partidos} usuarios={usuarios} deportes={deportes}

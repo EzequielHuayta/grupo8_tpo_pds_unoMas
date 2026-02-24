@@ -23,6 +23,7 @@ export const api = {
   finalizarPartido: (id, creadorId) => req(`/partidos/${id}/finalizar${creadorId ? `?creadorId=${creadorId}` : ''}`, { method: 'PUT' }),
   cancelarPartido: (id, creadorId) => req(`/partidos/${id}/cancelar${creadorId ? `?creadorId=${creadorId}` : ''}`, { method: 'PUT' }),
   getDeportes: () => req('/partidos/deportes'),
+  buscarPartidos: (usuarioId, estrategia) => req(`/partidos/buscar?usuarioId=${usuarioId}&estrategia=${estrategia}`),
 
   // Usuarios
   getUsuarios: () => req('/usuarios'),
