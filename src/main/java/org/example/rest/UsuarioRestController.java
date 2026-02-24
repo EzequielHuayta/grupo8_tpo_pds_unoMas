@@ -47,19 +47,16 @@ public class UsuarioRestController {
     }
 
     // POST /api/usuarios/registro
-    // Body: { "nombreUsuario": "Juan", "email": "juan@mail.com", "contrasena": "pass",
-    //         "ciudad": "Buenos Aires", "latitud": -34.6, "longitud": -58.38 }
+    // Body: { "nombreUsuario": "Juan", "email": "juan@mail.com", "contrasena": "pass", "barrio": "Palermo" }
     @PostMapping("/registro")
     public ResponseEntity<?> registrar(@RequestBody Map<String, Object> body) {
         try {
-            String nombre    = body.get("nombreUsuario").toString();
-            String email     = body.get("email").toString();
+            String nombre     = body.get("nombreUsuario").toString();
+            String email      = body.get("email").toString();
             String contrasena = body.get("contrasena").toString();
-            String ciudad    = body.get("ciudad").toString();
-            double latitud   = Double.parseDouble(body.get("latitud").toString());
-            double longitud  = Double.parseDouble(body.get("longitud").toString());
+            String barrio     = body.containsKey("barrio") ? body.get("barrio").toString() : "";
 
-            Ubicacion ubicacion = new Ubicacion(latitud, longitud, ciudad);
+            Ubicacion ubicacion = new Ubicacion(barrio);
             Usuario usuario = usuarioService.registrarUsuario(nombre, email, contrasena, ubicacion);
 
             // Automatically wire JavaMail notification strategy to the user's real email
@@ -125,9 +122,7 @@ public class UsuarioRestController {
         m.put("email", u.getEmail());
         m.put("nivel", u.getNivel().getNombre());
         if (u.getUbicacion() != null) {
-            m.put("ciudad", u.getUbicacion().getCiudad());
-            m.put("latitud", u.getUbicacion().getLatitud());
-            m.put("longitud", u.getUbicacion().getLongitud());
+            m.put("barrio", u.getUbicacion().getBarrio());
         }
         if (u.getDeporteFavorito() != null) {
             m.put("deporteFavorito", u.getDeporteFavorito().getNombre());

@@ -17,6 +17,7 @@ export default function App() {
   const [partidos, setPartidos] = useState([]);
   const [usuarios, setUsuarios] = useState([]);
   const [deportes, setDeportes] = useState([]);
+  const [barrios, setBarrios] = useState([]);
   const [loading, setLoading] = useState(false);
   const [toasts, setToasts] = useState([]);
   const [showLogin, setShowLogin] = useState(false);
@@ -35,8 +36,8 @@ export default function App() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [p, u, d] = await Promise.all([api.getPartidos(), api.getUsuarios(), api.getDeportes()]);
-      setPartidos(p); setUsuarios(u); setDeportes(d);
+      const [p, u, d, b] = await Promise.all([api.getPartidos(), api.getUsuarios(), api.getDeportes(), api.getBarrios()]);
+      setPartidos(p); setUsuarios(u); setDeportes(d); setBarrios(b);
     } catch {
       toast('No se pudo conectar al servidor. ¿Está corriendo el backend?', 'error');
     } finally { setLoading(false); }
@@ -115,18 +116,19 @@ export default function App() {
           />}
         {!loading && page === 'partidos' &&
           <PartidosList
-            partidos={partidos} usuarios={usuarios} deportes={deportes}
+            partidos={partidos} usuarios={usuarios} deportes={deportes} barrios={barrios}
             currentUser={currentUser}
             onLoginRequired={() => setShowLogin(true)}
             onRefresh={load} toast={toast}
           />}
         {!loading && page === 'usuarios' &&
-          <UsuariosList usuarios={usuarios} partidos={partidos} onRefresh={load} toast={toast} />}
+          <UsuariosList usuarios={usuarios} partidos={partidos} barrios={barrios} onRefresh={load} toast={toast} />}
       </main>
 
       {showLogin && (
         <LoginModal
           usuarios={usuarios}
+          barrios={barrios}
           onLogin={handleLogin}
         />
       )}

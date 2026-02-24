@@ -4,7 +4,7 @@ import { estadoBadge } from '../utils';
 import { SPORT_ICONS } from '../App';
 import CreatePartidoModal from './CreatePartidoModal';
 
-export default function PartidosList({ partidos, usuarios, deportes, currentUser, onLoginRequired, onRefresh, toast }) {
+export default function PartidosList({ partidos, usuarios, deportes, barrios, currentUser, onLoginRequired, onRefresh, toast }) {
     const [showCreate, setShowCreate] = useState(false);
     const [expanded, setExpanded] = useState(null);
     const [filterEstado, setFilterEstado] = useState('Todos');
@@ -66,7 +66,7 @@ export default function PartidosList({ partidos, usuarios, deportes, currentUser
                             {/* Score body */}
                             <div className="score-card-body">
                                 <div>
-                                    <div className="score-card-sport">📍 {p.ubicacion}</div>
+                                    <div className="score-card-sport">📍 {p.barrio}</div>
                                     <div style={{ fontSize: '.77rem', color: 'var(--muted)', marginTop: '.2rem' }}>
                                         ⏱ {p.duracionMinutos} min &nbsp;·&nbsp;
                                         🗓 {new Date(p.horario).toLocaleDateString('es-AR')}
@@ -94,38 +94,52 @@ export default function PartidosList({ partidos, usuarios, deportes, currentUser
                                         : p.jugadores.map(j => (
                                             <div key={j.id} className="jugador-row">
                                                 <span style={{ fontWeight: 600 }}>{j.nombre}</span>
-                                                <div style={{ display: 'flex', gap: '.35rem', alignItems: 'center' }}>
-                                                    <span className={`badge ${j.confirmado ? 'badge-green' : 'badge-yellow'}`}>
-                                                        {j.confirmado ? '✓ OK' : 'PENDIENTE'}
-                                                    </span>
-                                                    {isOwner(p) && !j.confirmado && p.estado === 'Partido armado' && (
-                                                        <button className="btn btn-gold btn-sm"
-                                                            onClick={() => {
-                                                                const u = usuarios.find(u => u.nombreUsuario === j.nombre);
-                                                                if (u) doAction(() => api.confirmarJugador(p.id, u.id));
-                                                            }}>CONFIRMAR</button>
-                                                    )}
-                                                </div>
+                                                <span className={`badge ${j.confirmado ? 'badge-green' : 'badge-yellow'}`}>
+                                                    {j.confirmado ? '✓ OK' : 'PENDIENTE'}
+                                                </span>
                                             </div>
                                         ))
                                     }
                                 </div>
                             )}
 
-                            {/* Actions — owner-only for state transitions */}
+                            {/* Actions */}
                             <div className="score-card-actions">
-                                {p.estado === 'Necesitamos jugadores' && usuarios.length > 0 && (
-                                    <select className="form-control" style={{ fontSize: '.78rem', padding: '.3rem .5rem', flex: 1 }}
-                                        defaultValue=""
-                                        onChange={e => {
-                                            if (e.target.value) doAction(() => api.agregarJugador(p.id, e.target.value));
-                                            e.target.value = '';
-                                        }}>
-                                        <option value="" disabled>+ AGREGAR JUGADOR</option>
-                                        {usuarios.filter(u => !p.jugadores.some(j => j.nombre === u.nombreUsuario))
-                                            .map(u => <option key={u.id} value={u.id}>{u.nombreUsuario}</option>)}
-                                    </select>
-                                )}
+                                {/* UNIRME: estado Necesitamos jugadores */}
+                                {p.estado === 'Necesitamos jugadores' && (() => {
+                                    if (!currentUser) return (
+                                        <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={onLoginRequired}>
+                                            + INICIA SESIÓN PARA UNIRTE
+                                        </button>
+                                    );
+                                    const yaInscripto = p.jugadores.some(j => j.nombre === currentUser.nombreUsuario);
+                                    if (yaInscripto) return (
+                                        <span style={{ fontSize: '.75rem', color: 'var(--muted)', fontFamily: "'Barlow Condensed'", textTransform: 'uppercase' }}>
+                                            ✓ YA ESTÁS INSCRIPTO
+                                        </span>
+                                    );
+                                    if (isOwner(p)) return null;
+                                    return (
+                                        <button className="btn btn-success btn-sm" style={{ flex: 1 }}
+                                            onClick={() => doAction(() => api.agregarJugador(p.id, currentUser.id))}>
+                                            ✚ UNIRME
+                                        </button>
+                                    );
+                                })()}
+
+                                {/* CONFIRMAR MI ASISTENCIA: estado Partido armado, jugador logueado inscripto y no confirmado */}
+                                {p.estado === 'Partido armado' && currentUser && (() => {
+                                    const miJugador = p.jugadores.find(j => j.nombre === currentUser.nombreUsuario);
+                                    if (!miJugador || miJugador.confirmado) return null;
+                                    return (
+                                        <button className="btn btn-gold btn-sm" style={{ flex: 1 }}
+                                            onClick={() => doAction(() => api.confirmarJugador(p.id, currentUser.id))}>
+                                            ✓ CONFIRMAR MI ASISTENCIA
+                                        </button>
+                                    );
+                                })()}
+
+                                {/* Transiciones de estado: solo owner */}
                                 {isOwner(p) && p.estado === 'Confirmado' && (
                                     <button className="btn btn-success btn-sm"
                                         onClick={() => doAction(() => api.iniciarPartido(p.id, currentUser.id))}>▶ INICIAR</button>
@@ -138,11 +152,6 @@ export default function PartidosList({ partidos, usuarios, deportes, currentUser
                                     <button className="btn btn-danger btn-sm"
                                         onClick={() => doAction(() => api.cancelarPartido(p.id, currentUser.id))}>✕ CANCELAR</button>
                                 )}
-                                {!isOwner(p) && p.creadorId && currentUser && !['Finalizado', 'Cancelado'].includes(p.estado) && (
-                                    <span style={{ fontSize: '.72rem', color: 'var(--muted)', fontFamily: "'Barlow Condensed'", textTransform: 'uppercase' }}>
-                                        Solo el 👑 creador puede gestionar
-                                    </span>
-                                )}
                             </div>
                         </div>
                     ))}
@@ -150,7 +159,7 @@ export default function PartidosList({ partidos, usuarios, deportes, currentUser
             }
 
             {showCreate && (
-                <CreatePartidoModal deportes={deportes}
+                <CreatePartidoModal deportes={deportes} barrios={barrios}
                     currentUser={currentUser}
                     onClose={() => setShowCreate(false)}
                     onCreated={() => { setShowCreate(false); onRefresh(); toast('PARTIDO CREADO'); }}

@@ -3,20 +3,18 @@ package org.example.strategy;
 import org.example.model.Partido;
 import org.example.model.Usuario;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class EmparejadorUbicacionStrategy implements IEmparejadorStrategy {
 
-    private static final double RADIO_MAXIMO_KM = 50.0;
-
     @Override
     public List<Partido> buscarPartido(Usuario usuario, List<Partido> partidosDisponibles) {
+        if (usuario.getUbicacion() == null) return partidosDisponibles;
+        String barrioUsuario = usuario.getUbicacion().getBarrio();
         return partidosDisponibles.stream()
-                .filter(p -> usuario.getUbicacion().calcularDistancia(p.getUbicacion()) <= RADIO_MAXIMO_KM)
-                .sorted(Comparator.comparingDouble(
-                        p -> usuario.getUbicacion().calcularDistancia(p.getUbicacion())))
+                .filter(p -> p.getUbicacion() != null
+                        && barrioUsuario.equalsIgnoreCase(p.getUbicacion().getBarrio()))
                 .collect(Collectors.toList());
     }
 }

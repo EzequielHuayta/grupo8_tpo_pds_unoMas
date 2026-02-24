@@ -19,7 +19,7 @@ import java.util.Optional;
  * Persists matches in data/partidos.txt
  *
  * Format per line:
- *   id|deporteId|deporteNombre|cantJugadores|duracion|ciudad|lat|lon|horario|estadoNombre|nivelMinPeso|nivelMaxPeso|jugadores
+ *   id|deporteId|deporteNombre|cantJugadores|duracion|barrio|horario|estadoNombre|nivelMinPeso|nivelMaxPeso|creadorId|jugadores
  *
  * jugadores field: jId1:uId1:confirmado;jId2:uId2:confirmado   (empty string if none)
  */
@@ -56,19 +56,16 @@ public class PartidoRepositoryImpl implements IPartidoRepository {
                 String deporteNombre= p[2];
                 int cantJugadores   = Integer.parseInt(p[3]);
                 int duracion        = Integer.parseInt(p[4]);
-                String ciudad       = p[5];
-                double lat          = Double.parseDouble(p[6]);
-                double lon          = Double.parseDouble(p[7]);
-                LocalDateTime horario = LocalDateTime.parse(p[8]);
-                String estadoNombre = p[9];
-                int nivelMinPeso    = Integer.parseInt(p[10]);
-                int nivelMaxPeso    = Integer.parseInt(p[11]);
-                // field 12 = creadorId (added later, may be absent in old files)
-                Long creadorId      = p.length > 12 ? Long.parseLong(p[12]) : null;
-                String jugadoresData= p.length > 13 ? p[13] : (p.length > 12 && !p[12].contains(":") ? p[12] : "");
+                String barrio       = p[5];
+                LocalDateTime horario = LocalDateTime.parse(p[6]);
+                String estadoNombre = p[7];
+                int nivelMinPeso    = Integer.parseInt(p[8]);
+                int nivelMaxPeso    = Integer.parseInt(p[9]);
+                Long creadorId      = (p.length > 10 && !p[10].trim().isEmpty()) ? Long.parseLong(p[10].trim()) : null;
+                String jugadoresData= p.length > 11 ? p[11] : "";
 
                 Deporte deporte = new Deporte(deporteId, deporteNombre);
-                Ubicacion ubicacion = new Ubicacion(lat, lon, ciudad);
+                Ubicacion ubicacion = new Ubicacion(barrio);
 
                 Partido partido = new Partido(id, deporte, cantJugadores, duracion, ubicacion, horario);
                 partido.setEstado(estadoDesde(estadoNombre));
@@ -121,14 +118,12 @@ public class PartidoRepositoryImpl implements IPartidoRepository {
                         + p.getDeporte().getNombre() + "|"
                         + p.getCantidadJugadores() + "|"
                         + p.getDuracionMinutos() + "|"
-                        + p.getUbicacion().getCiudad() + "|"
-                        + p.getUbicacion().getLatitud() + "|"
-                        + p.getUbicacion().getLongitud() + "|"
+                        + p.getUbicacion().getBarrio() + "|"
                         + p.getHorario().toString() + "|"
                         + p.getEstado().getNombre() + "|"
                         + p.getNivelMinimo().getPesoNivel() + "|"
                         + p.getNivelMaximo().getPesoNivel() + "|"
-                        + (p.getCreadorId() != null ? p.getCreadorId() : 0) + "|"
+                        + (p.getCreadorId() != null ? p.getCreadorId() : "") + "|"
                         + jBuilder.toString());
             }
         } catch (IOException e) {

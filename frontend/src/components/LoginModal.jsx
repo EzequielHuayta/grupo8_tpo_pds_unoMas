@@ -77,7 +77,7 @@ export default function LoginModal({ usuarios, onLogin }) {
                             </div>
                             <div>
                                 <div style={{ fontWeight: 700, fontSize: '.9rem' }}>{u.nombreUsuario}</div>
-                                <div style={{ fontSize: '.75rem', color: 'var(--muted)' }}>{u.nivel} · {u.ciudad || 'Sin ciudad'}</div>
+                                <div style={{ fontSize: '.75rem', color: 'var(--muted)' }}>{u.nivel} · {u.barrio || 'Sin barrio'}</div>
                             </div>
                             <div style={{ marginLeft: 'auto', color: 'var(--red)', fontSize: '.85rem', fontFamily: "'Barlow Condensed'", fontWeight: 700 }}>
                                 ENTRAR →

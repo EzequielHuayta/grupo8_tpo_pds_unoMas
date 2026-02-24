@@ -4,11 +4,11 @@ import { api } from '../api';
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado'];
 const DEFAULT = {
     deporteId: '', cantidadJugadores: 5, duracionMinutos: 90,
-    ciudad: '', latitud: '', longitud: '',
+    barrio: '',
     horario: '', nivelMinimo: 'Principiante', nivelMaximo: 'Avanzado',
 };
 
-export default function CreatePartidoModal({ deportes, currentUser, onClose, onCreated, toast }) {
+export default function CreatePartidoModal({ deportes, barrios, currentUser, onClose, onCreated, toast }) {
     const [form, setForm] = useState(DEFAULT);
     const [loading, setLoading] = useState(false);
 
@@ -16,21 +16,23 @@ export default function CreatePartidoModal({ deportes, currentUser, onClose, onC
 
     const submit = async e => {
         e.preventDefault();
-        if (!form.deporteId || !form.ciudad || !form.horario) {
+        if (!form.deporteId || !form.barrio || !form.horario) {
             toast('Completa todos los campos requeridos', 'error');
             return;
         }
         setLoading(true);
         try {
-            await api.crearPartido({
+            const partido = await api.crearPartido({
                 ...form,
                 deporteId: Number(form.deporteId),
                 cantidadJugadores: Number(form.cantidadJugadores),
                 duracionMinutos: Number(form.duracionMinutos),
-                latitud: Number(form.latitud) || 0,
-                longitud: Number(form.longitud) || 0,
                 creadorId: currentUser ? currentUser.id : null,
             });
+            // Sumarse automáticamente al partido recién creado
+            if (currentUser && partido && partido.id) {
+                await api.agregarJugador(partido.id, currentUser.id);
+            }
             onCreated();
         } catch (e) {
             toast(e.message, 'error');
@@ -66,22 +68,11 @@ export default function CreatePartidoModal({ deportes, currentUser, onClose, onC
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Ciudad *</label>
-                        <input className="form-control" placeholder="Buenos Aires" value={form.ciudad}
-                            onChange={e => set('ciudad', e.target.value)} />
-                    </div>
-
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label className="form-label">Latitud</label>
-                            <input className="form-control" type="number" step="any" placeholder="-34.6037" value={form.latitud}
-                                onChange={e => set('latitud', e.target.value)} />
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Longitud</label>
-                            <input className="form-control" type="number" step="any" placeholder="-58.3816" value={form.longitud}
-                                onChange={e => set('longitud', e.target.value)} />
-                        </div>
+                        <label className="form-label">Barrio *</label>
+                        <select className="form-control" value={form.barrio} onChange={e => set('barrio', e.target.value)}>
+                            <option value="">Seleccionar barrio…</option>
+                            {barrios.map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
                     </div>
 
                     <div className="form-group">

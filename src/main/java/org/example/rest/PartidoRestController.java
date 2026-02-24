@@ -7,9 +7,15 @@ import org.example.nivel.NivelState;
 import org.example.nivel.Principiante;
 import org.example.service.PartidoService;
 import org.example.service.UsuarioService;
+import org.example.strategy.EmparejadorHistorialStrategy;
+import org.example.strategy.EmparejadorNivelStrategy;
+import org.example.strategy.EmparejadorUbicacionStrategy;
+import org.example.strategy.IEmparejadorStrategy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -21,7 +27,7 @@ public class PartidoRestController {
 
     private final PartidoService partidoService;
     private final UsuarioService usuarioService;
-    // Deportes pre-cargados (en memoria simple)
+
     private static final List<Deporte> DEPORTES = Arrays.asList(
             new Deporte(1L, "Fútbol"),
             new Deporte(2L, "Básquet"),
@@ -30,9 +36,39 @@ public class PartidoRestController {
             new Deporte(5L, "Paddle")
     );
 
+    private static final String BARRIOS_FILE = "data/barrios.txt";
+
+    private static final List<String> BARRIOS = Arrays.asList(
+            "Agronomía", "Almagro", "Balvanera", "Barracas", "Belgrano",
+            "Boedo", "Caballito", "Chacarita", "Coghlan", "Colegiales",
+            "Constitución", "Flores", "Floresta", "La Boca", "La Paternal",
+            "Liniers", "Mataderos", "Monte Castro", "Monserrat", "Nueva Pompeya",
+            "Núñez", "Palermo", "Parque Avellaneda", "Parque Chacabuco",
+            "Parque Chas", "Parque Patricios", "Paternal", "Puerto Madero",
+            "Recoleta", "Retiro", "Saavedra", "San Cristóbal", "San Nicolás",
+            "San Telmo", "Versalles", "Villa Crespo", "Villa del Parque",
+            "Villa Devoto", "Villa General Mitre", "Villa Lugano", "Villa Luro",
+            "Villa Ortúzar", "Villa Pueyrredón", "Villa Real", "Villa Riachuelo",
+            "Villa Santa Rita", "Villa Soldati", "Villa Urquiza", "Vélez Sársfield"
+    );
+
     public PartidoRestController(PartidoService partidoService, UsuarioService usuarioService) {
         this.partidoService = partidoService;
         this.usuarioService = usuarioService;
+    }
+
+    @PostConstruct
+    public void inicializar() {
+        // Sincronizar el txt con la lista hardcodeada (siempre sobreescribe para mantener UTF-8)
+        new File("data").mkdirs();
+        try (PrintWriter pw = new PrintWriter(
+                new java.io.OutputStreamWriter(
+                        new java.io.FileOutputStream(BARRIOS_FILE), java.nio.charset.StandardCharsets.UTF_8))) {
+            for (String b : BARRIOS) pw.println(b);
+            System.out.println("[BarriosRepo] " + BARRIOS.size() + " barrios disponibles.");
+        } catch (IOException e) {
+            System.err.println("[BarriosRepo] Error al escribir: " + e.getMessage());
+        }
     }
 
     // GET /api/partidos
@@ -66,23 +102,19 @@ public class PartidoRestController {
 
             int cantJugadores  = Integer.parseInt(body.get("cantidadJugadores").toString());
             int duracion       = Integer.parseInt(body.get("duracionMinutos").toString());
-            String ciudad      = body.get("ciudad").toString();
-            double latitud     = Double.parseDouble(body.get("latitud").toString());
-            double longitud    = Double.parseDouble(body.get("longitud").toString());
+            String barrio      = body.get("barrio").toString();
             LocalDateTime horario = LocalDateTime.parse(body.get("horario").toString());
 
-            // creadorId is required – the logged-in user who creates the match
             Long creadorId = body.containsKey("creadorId")
                     ? Long.valueOf(body.get("creadorId").toString()) : null;
 
-            Ubicacion ubicacion = new Ubicacion(latitud, longitud, ciudad);
+            Ubicacion ubicacion = new Ubicacion(barrio);
             NivelState nivelMin = parseNivel(body.getOrDefault("nivelMinimo", "Principiante").toString());
             NivelState nivelMax = parseNivel(body.getOrDefault("nivelMaximo", "Avanzado").toString());
 
             Partido partido = partidoService.crearPartido(deporte, cantJugadores, duracion,
                     ubicacion, horario, nivelMin, nivelMax);
             partido.setCreadorId(creadorId);
-            // persist the creadorId
             partidoService.guardar(partido);
 
             return ResponseEntity.ok(toMap(partido));
@@ -165,6 +197,41 @@ public class PartidoRestController {
         }
     }
 
+    // GET /api/partidos/buscar?usuarioId=1&estrategia=NIVEL
+    // estrategia: NIVEL | UBICACION | HISTORIAL
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarPartidos(
+            @RequestParam Long usuarioId,
+            @RequestParam(defaultValue = "NIVEL") String estrategia) {
+        try {
+            Usuario usuario = usuarioService.buscarPorId(usuarioId);
+
+            // Solo partidos disponibles (aceptan jugadores) y donde el usuario aún no está inscripto
+            List<Partido> disponibles = partidoService.getPartidos().stream()
+                    .filter(p -> p.getEstado().getNombre().equals("Necesitamos jugadores"))
+                    .filter(p -> p.getJugadores().stream()
+                            .noneMatch(j -> j.getJugador().getIdUsuario().equals(usuarioId)))
+                    .filter(p -> p.getCreadorId() == null || !p.getCreadorId().equals(usuarioId))
+                    .collect(java.util.stream.Collectors.toList());
+
+            // Seleccionar estrategia
+            IEmparejadorStrategy strategy;
+            switch (estrategia.toUpperCase()) {
+                case "UBICACION": strategy = new EmparejadorUbicacionStrategy(); break;
+                case "HISTORIAL": strategy = new EmparejadorHistorialStrategy(); break;
+                default:          strategy = new EmparejadorNivelStrategy();     break;
+            }
+
+            List<Partido> resultado = strategy.buscarPartido(usuario, disponibles);
+
+            return ResponseEntity.ok(resultado.stream().map(this::toMap).collect(java.util.stream.Collectors.toList()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Collections.singletonMap("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
     // GET /api/partidos/deportes
     @GetMapping("/deportes")
     public List<Map<String, Object>> listarDeportes() {
@@ -178,6 +245,12 @@ public class PartidoRestController {
         return result;
     }
 
+    // GET /api/barrios
+    @GetMapping("/barrios")
+    public List<String> listarBarrios() {
+        return new ArrayList<>(BARRIOS);
+    }
+
     // --- helpers ---
 
     private Map<String, Object> toMap(Partido p) {
@@ -189,9 +262,7 @@ public class PartidoRestController {
         m.put("cantidadJugadores", p.getCantidadJugadores());
         m.put("jugadoresActuales", p.getJugadores().size());
         m.put("duracionMinutos", p.getDuracionMinutos());
-        m.put("ubicacion", p.getUbicacion().getCiudad());
-        m.put("latitud", p.getUbicacion().getLatitud());
-        m.put("longitud", p.getUbicacion().getLongitud());
+        m.put("barrio", p.getUbicacion() != null ? p.getUbicacion().getBarrio() : "");
         m.put("horario", p.getHorario().toString());
         m.put("nivelMinimo", p.getNivelMinimo().getNombre());
         m.put("nivelMaximo", p.getNivelMaximo().getNombre());

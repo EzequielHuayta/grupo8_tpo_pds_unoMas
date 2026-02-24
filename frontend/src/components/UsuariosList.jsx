@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { api } from '../api';
 import { nivelBadge, initials } from '../utils';
 
-const DEFAULT = { nombreUsuario: '', email: '', contrasena: '', ciudad: '', latitud: '', longitud: '', nivel: 'Principiante' };
+const DEFAULT = { nombreUsuario: '', email: '', contrasena: '', barrio: '', nivel: 'Principiante' };
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado'];
 
-export default function UsuariosList({ usuarios, partidos, onRefresh, toast }) {
+export default function UsuariosList({ usuarios, partidos, barrios, onRefresh, toast }) {
     const [showRegister, setShowRegister] = useState(false);
     const [form, setForm] = useState(DEFAULT);
     const [loading, setLoading] = useState(false);
@@ -14,12 +14,12 @@ export default function UsuariosList({ usuarios, partidos, onRefresh, toast }) {
 
     const register = async e => {
         e.preventDefault();
-        if (!form.nombreUsuario || !form.email || !form.contrasena || !form.ciudad) {
+        if (!form.nombreUsuario || !form.email || !form.contrasena || !form.barrio) {
             toast('COMPLETÁ TODOS LOS CAMPOS', 'error'); return;
         }
         setLoading(true);
         try {
-            await api.registrarUsuario({ ...form, latitud: Number(form.latitud) || 0, longitud: Number(form.longitud) || 0 });
+            await api.registrarUsuario({ ...form });
             setShowRegister(false); setForm(DEFAULT);
             await onRefresh();
             toast('JUGADOR REGISTRADO');
@@ -46,18 +46,18 @@ export default function UsuariosList({ usuarios, partidos, onRefresh, toast }) {
                 ? <div className="empty">— SIN JUGADORES AÚN —</div>
                 : <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                     {/* Table header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 120px 120px 100px', gap: '.75rem', padding: '.4rem .75rem', fontSize: '.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', borderBottom: '2px solid var(--red)' }}>
-                        <span>#</span><span></span><span>JUGADOR</span><span>CIUDAD</span><span>NIVEL</span><span>CAMBIAR</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 120px 100px', gap: '.75rem', padding: '.4rem .75rem', fontSize: '.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', borderBottom: '2px solid var(--red)' }}>
+                        <span>#</span><span></span><span>JUGADOR</span><span>BARRIO</span><span>NIVEL</span><span>CAMBIAR</span>
                     </div>
                     {usuarios.map((u, i) => (
-                        <div key={u.id} className="usuario-row" style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 120px 120px 100px', gap: '.75rem', alignItems: 'center' }}>
+                        <div key={u.id} className="usuario-row" style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 120px 100px', gap: '.75rem', alignItems: 'center' }}>
                             <span className="number">{i + 1}</span>
                             <div className="avatar">{initials(u.nombreUsuario)}</div>
                             <div>
                                 <div className="usuario-name">{u.nombreUsuario}</div>
                                 <div className="usuario-meta">{u.email}</div>
                             </div>
-                            <div className="usuario-meta">{u.ciudad || '—'}</div>
+                            <div className="usuario-meta">📍 {u.barrio || '—'}</div>
                             <span className={`badge ${nivelBadge(u.nivel)}`}>{u.nivel.toUpperCase()}</span>
                             <select className="form-control" style={{ fontSize: '.75rem', padding: '.25rem .4rem' }}
                                 value={u.nivel}
@@ -87,18 +87,11 @@ export default function UsuariosList({ usuarios, partidos, onRefresh, toast }) {
                                 <input className="form-control" type="password" value={form.contrasena} onChange={e => set('contrasena', e.target.value)} />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">CIUDAD *</label>
-                                <input className="form-control" placeholder="Buenos Aires" value={form.ciudad} onChange={e => set('ciudad', e.target.value)} />
-                            </div>
-                            <div className="form-row">
-                                <div className="form-group">
-                                    <label className="form-label">LATITUD</label>
-                                    <input className="form-control" type="number" step="any" placeholder="-34.60" value={form.latitud} onChange={e => set('latitud', e.target.value)} />
-                                </div>
-                                <div className="form-group">
-                                    <label className="form-label">LONGITUD</label>
-                                    <input className="form-control" type="number" step="any" placeholder="-58.38" value={form.longitud} onChange={e => set('longitud', e.target.value)} />
-                                </div>
+                                <label className="form-label">BARRIO *</label>
+                                <select className="form-control" value={form.barrio} onChange={e => set('barrio', e.target.value)}>
+                                    <option value="">Seleccionar barrio…</option>
+                                    {(barrios || []).map(b => <option key={b} value={b}>{b}</option>)}
+                                </select>
                             </div>
                             <div className="form-group">
                                 <label className="form-label">NIVEL</label>

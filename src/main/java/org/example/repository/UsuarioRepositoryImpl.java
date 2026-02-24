@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * Persists users in data/usuarios.txt
- * Format per line: id|nombreUsuario|email|contrasena|nivelPeso|ciudad|latitud|longitud
+ * Format per line: id|nombreUsuario|email|contrasena|nivelPeso|barrio
  */
 @Repository
 public class UsuarioRepositoryImpl implements IUsuarioRepository {
@@ -36,18 +36,16 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty()) continue;
                 String[] p = line.split("\\|", -1);
-                // id|nombre|email|contrasena|nivelPeso|ciudad|latitud|longitud
+                // id|nombre|email|contrasena|nivelPeso|barrio
                 Long id         = Long.parseLong(p[0]);
                 String nombre   = p[1];
                 String email    = p[2];
                 String contra   = p[3];
                 int nivelPeso   = Integer.parseInt(p[4]);
-                String ciudad   = p[5];
-                double lat      = Double.parseDouble(p[6]);
-                double lon      = Double.parseDouble(p[7]);
+                String barrio   = p.length > 5 ? p[5] : "";
 
                 Usuario u = new Usuario(id, nombre, email, contra);
-                u.setUbicacion(new Ubicacion(lat, lon, ciudad));
+                u.setUbicacion(new Ubicacion(barrio));
                 u.setNivel(nivelDesde(nivelPeso));
                 usuarios.add(u);
 
@@ -63,15 +61,13 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
         new File("data").mkdirs();
         try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_PATH))) {
             for (Usuario u : usuarios) {
-                String ciudad = u.getUbicacion() != null ? u.getUbicacion().getCiudad() : "";
-                double lat    = u.getUbicacion() != null ? u.getUbicacion().getLatitud()  : 0.0;
-                double lon    = u.getUbicacion() != null ? u.getUbicacion().getLongitud() : 0.0;
+                String barrio = u.getUbicacion() != null ? u.getUbicacion().getBarrio() : "";
                 pw.println(u.getIdUsuario() + "|"
                         + u.getNombreUsuario() + "|"
                         + u.getEmail() + "|"
                         + u.getContrasena() + "|"
                         + u.getNivel().getPesoNivel() + "|"
-                        + ciudad + "|" + lat + "|" + lon);
+                        + barrio);
             }
         } catch (IOException e) {
             System.err.println("[UsuarioRepo] Error al persistir: " + e.getMessage());
