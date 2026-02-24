@@ -1,3 +1,4 @@
-2|rodri|rodri@gmail.com|1234|2|Boedo|1,2,3|Email|3|NIVEL
-3|maxi|maxi@gmail.com|1234|1|Flores|2|Email|4|NIVEL
-1|juan|juan@gmail.com|1234|1|Almagro|1,2|Email|1|UBICACION
+3|maxi|maxi@gmail.com|1234|1|Flores|2,3|Email|4|NIVEL
+2|rodri|rodri@gmail.com|1234|2|Boedo|1,2,3,4|Email|3|NIVEL
+4|MaximilianoMail|mmonteverdi.gipfel.ccm@gmail.com|1234|1|Agronomía|4|Email|1|UBICACION
+1|juan|juan@gmail.com|1234|1|Almagro|1,2,3,5|Email|1|UBICACION

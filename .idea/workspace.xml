@@ -47,26 +47,27 @@
   &quot;associatedIndex&quot;: 2
 }</component>
   <component name="ProjectId" id="3A27z4VGzH7MeYhTOn3ANmDVeIM" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+  <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
-    &quot;Node.js.api.js.executor&quot;: &quot;Run&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;Spring Boot.Main.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;implementacion&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Main.executor": "Run",
+    "Node.js.api.js.executor": "Run",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "Spring Boot.Main (1).executor": "Run",
+    "Spring Boot.Main.executor": "Run",
+    "git-widget-placeholder": "implementacion",
+    "node.js.selected.package.tslint": "(autodetect)"
   }
-}</component>
-  <component name="RunManager">
+}]]></component>
+  <component name="RunManager" selected="Spring Boot.Main (1)">
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
         <option name="Make" enabled="true" />
@@ -74,6 +75,19 @@
     </configuration>
     <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
       <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Main (1)" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <module name="untitled" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="org.example.Main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.example.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -91,6 +105,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Spring Boot.Main (1)" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">

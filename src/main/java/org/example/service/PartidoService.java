@@ -5,6 +5,7 @@ import org.example.nivel.NivelState;
 import org.example.repository.IPartidoRepository;
 import org.example.state.NecesitamosJugadoresState;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,9 @@ import java.util.stream.Collectors;
 public class PartidoService {
     private final IPartidoRepository partidoRepository;
     private final DeporteService deporteService;
+    
+    @Autowired
+    private PartidoEstadoNotifier partidoEstadoNotifier;
 
     public PartidoService(IPartidoRepository partidoRepository, DeporteService deporteService) {
         this.partidoRepository = partidoRepository;
@@ -63,18 +67,56 @@ public class PartidoService {
     }
 
     public void cancelarPartido(Partido partido) {
+        String estadoAnterior = partido.getEstado().getNombre();
         partido.cancelar();
+        String estadoNuevo = partido.getEstado().getNombre();
+        
         partidoRepository.guardar(partido);
+        
+        // Notificar cambio de estado si es necesario
+        if (partidoEstadoNotifier.debeNotificar(estadoAnterior, estadoNuevo)) {
+            partidoEstadoNotifier.notificarCambioEstado(partido, estadoAnterior, estadoNuevo);
+        }
     }
 
     public void iniciarPartido(Partido partido) {
+        String estadoAnterior = partido.getEstado().getNombre();
         partido.iniciar();
+        String estadoNuevo = partido.getEstado().getNombre();
+        
         partidoRepository.guardar(partido);
+        
+        // Notificar cambio de estado si es necesario
+        if (partidoEstadoNotifier.debeNotificar(estadoAnterior, estadoNuevo)) {
+            partidoEstadoNotifier.notificarCambioEstado(partido, estadoAnterior, estadoNuevo);
+        }
     }
 
     public void finalizarPartido(Partido partido) {
+        String estadoAnterior = partido.getEstado().getNombre();
         partido.finalizar();
+        String estadoNuevo = partido.getEstado().getNombre();
+        
         partidoRepository.guardar(partido);
+        
+        // Notificar cambio de estado si es necesario
+        if (partidoEstadoNotifier.debeNotificar(estadoAnterior, estadoNuevo)) {
+            partidoEstadoNotifier.notificarCambioEstado(partido, estadoAnterior, estadoNuevo);
+        }
+    }
+
+    
+    public void confirmarPartido(Partido partido) {
+        String estadoAnterior = partido.getEstado().getNombre();
+        partido.confirmar();
+        String estadoNuevo = partido.getEstado().getNombre();
+        
+        partidoRepository.guardar(partido);
+        
+        // Notificar cambio de estado si es necesario
+        if (partidoEstadoNotifier.debeNotificar(estadoAnterior, estadoNuevo)) {
+            partidoEstadoNotifier.notificarCambioEstado(partido, estadoAnterior, estadoNuevo);
+        }
     }
 
     public List<Partido> buscarPartidos(Usuario usuario) {

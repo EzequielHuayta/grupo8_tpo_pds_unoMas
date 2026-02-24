@@ -160,8 +160,21 @@ public class Partido implements ISubject {
         return estado;
     }
 
-    public void setEstado(IPartidoState estado) {
-        this.estado = estado;
+    public void setEstado(IPartidoState nuevoEstado) {
+        String estadoAnterior = this.estado != null ? this.estado.getNombre() : "Inicial";
+        this.estado = nuevoEstado;
+        String estadoNuevo = nuevoEstado.getNombre();
+        
+        // Notificar cambio de estado a través del patrón Observer
+        notificarCambioEstado(estadoAnterior, estadoNuevo);
+        notificarObservers();
+    }
+    
+    private void notificarCambioEstado(String estadoAnterior, String estadoNuevo) {
+        // Este método será llamado por el servicio PartidoEstadoNotifier a través del ISubject
+        // Por ahora solo registramos el cambio
+        System.out.println("[Partido #" + idPartido + "] Cambio de estado: " + 
+                          estadoAnterior + " → " + estadoNuevo);
     }
 
     public NivelState getNivelMinimo() {
