@@ -74,6 +74,10 @@ public class Partido implements ISubject {
      * corresponde transicionar a Armado cuando se completa el cupo.
      */
     public void agregarJugador(Jugador jugador) {
+        if (jugadores.size() >= cantidadJugadores) {
+            throw new IllegalStateException(
+                    "El partido #" + idPartido + " ya tiene el cupo completo (" + cantidadJugadores + " jugadores).");
+        }
         jugadores.add(jugador);
         agregarObserver(jugador.getJugador());
         estado.avanzar(this); // NecesitamosJugadoresState evaluará si pasamos a Armado
