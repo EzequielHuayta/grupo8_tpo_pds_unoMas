@@ -58,9 +58,10 @@ export default function App() {
     toast('SESIÓN CERRADA');
   };
 
-  // Ticker
-  const tickerItems = partidos.slice(0, 6).map(p =>
-    `${SPORT_ICONS[p.deporte] || '🏟'} ${p.deporte.toUpperCase()} · ${p.ubicacion} · ${p.jugadoresActuales}/${p.cantidadJugadores} · ${p.estado.toUpperCase()}`
+  // Ticker: solo partidos "En juego"
+  const enJuegoPartidos = partidos.filter(p => p.estado === 'En juego');
+  const tickerItems = enJuegoPartidos.map(p =>
+    `${SPORT_ICONS[p.deporte] || '🏟'} ${p.deporte.toUpperCase()} · ${p.barrio} · ${p.jugadoresActuales}/${p.cantidadJugadores} · EN JUEGO`
   );
 
   return (
@@ -94,14 +95,23 @@ export default function App() {
         </div>
       </header>
 
-      {tickerItems.length > 0 && (
-        <div className="ticker">
-          <span className="ticker-label">EN VIVO</span>
+      <div className="ticker">
+        <span className="ticker-label" style={{ flexShrink: 0 }}>EN VIVO</span>
+        <div style={{ overflow: 'hidden', flex: 1 }}>
           <div className="ticker-items">
-            {[...tickerItems, ...tickerItems].map((t, i) => <span key={i}>{t}</span>)}
+            {(() => {
+              const base = tickerItems.length > 0
+                ? tickerItems
+                : ['📅 No hay ningún partido en juego ahora mismo ¡Andá a MIS PARTIDOS y creá el próximo!'];
+              // Repeat 10x so content always overflows → animation -50% loops seamlessly
+              return Array.from({ length: 10 }, () => base).flat()
+                .map((t, i) => <span key={i}>{t}</span>);
+            })()}
           </div>
         </div>
-      )}
+      </div>
+
+
 
       <main className="main">
         {loading && <div className="spinner" />}
@@ -112,6 +122,7 @@ export default function App() {
             currentUser={currentUser}
             onLoginRequired={() => setShowLogin(true)}
             onRefresh={load}
+            onNavigate={setPage}
             toast={toast}
           />}
         {!loading && page === 'partidos' &&

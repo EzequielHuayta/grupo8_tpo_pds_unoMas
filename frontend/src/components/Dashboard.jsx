@@ -7,7 +7,22 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
     const finalizados = partidos.filter(p => p.estado === 'Finalizado').length;
 
     const byEstado = partidos.reduce((acc, p) => { acc[p.estado] = (acc[p.estado] || 0) + 1; return acc; }, {});
-    const recientes = [...partidos].reverse().slice(0, 6);
+    const concluidos = [...partidos]
+        .filter(p => p.estado === 'Finalizado' || p.estado === 'Cancelado')
+        .reverse()
+        .slice(0, 6);
+
+    // Cantidad de partidos por usuario (como creador o jugador), ordenado desc, top 10
+    const usuariosConPartidos = usuarios
+        .map(u => ({
+            ...u,
+            partidosCount: partidos.filter(p =>
+                (p.creadorId && Number(p.creadorId) === Number(u.id)) ||
+                (p.jugadores && p.jugadores.some(j => j.nombre === u.nombreUsuario))
+            ).length,
+        }))
+        .sort((a, b) => b.partidosCount - a.partidosCount)
+        .slice(0, 10);
 
     return (
         <div>
@@ -16,16 +31,13 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
                 {[
                     { value: partidos.length, label: 'Partidos' },
                     { value: activos, label: 'Activos' },
-                    { value: enJuego, label: 'En juego', live: enJuego > 0 },
+                    { value: enJuego, label: 'En juego' },
                     { value: usuarios.length, label: 'Jugadores' },
                     { value: finalizados, label: 'Finalizados' },
                 ].map(s => (
                     <div className="stat-box" key={s.label}>
-                        <div className="value" style={s.live ? { color: '#cc0000' } : {}}>{s.value}</div>
-                        <div className="label">
-                            {s.live && <span className="badge badge-live" style={{ marginRight: '.35rem' }}>LIVE</span>}
-                            {s.label}
-                        </div>
+                        <div className="value">{s.value}</div>
+                        <div className="label">{s.label}</div>
                     </div>
                 ))}
             </div>
@@ -36,33 +48,65 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
                     <div className="section-header">
                         <div>
                             <div className="section-label">Actividad reciente</div>
-                            <div className="section-title">Últimos partidos</div>
+                            <div className="section-title">Últimos partidos concluidos</div>
                         </div>
                         <button className="btn btn-outline btn-sm" onClick={() => onNavigate('partidos')}>VER TODOS →</button>
                     </div>
 
-                    {recientes.length === 0
-                        ? <div className="empty">— SIN PARTIDOS AÚN —</div>
-                        : <div style={{ display: 'flex', flexDirection: 'column', gap: '.6rem' }}>
-                            {recientes.map(p => (
+                    {concluidos.length === 0
+                        ? <div className="empty">— AÚN NO HAY PARTIDOS CONCLUIDOS —</div>
+                        : <div style={{ display: 'flex', flexDirection: 'column', gap: '.75rem' }}>
+                            {concluidos.map(p => (
                                 <div key={p.id} className="score-card">
+                                    {/* Header */}
                                     <div className="score-card-top">
-                                        <span>{SPORT_ICONS[p.deporte] || '🏟'} {p.deporte}</span>
-                                        <span className={`badge ${estadoBadge(p.estado)}`}>{p.estado}</span>
+                                        <span style={{ fontFamily: "'Barlow Condensed'", fontWeight: 800, fontSize: '.9rem' }}>
+                                            {SPORT_ICONS[p.deporte] || '🏟'} {p.deporte.toUpperCase()} · #{p.id}
+                                        </span>
+                                        <span className={`badge ${estadoBadge(p.estado)}`}>{p.estado.toUpperCase()}</span>
                                     </div>
+
+                                    {/* Body */}
                                     <div className="score-card-body">
                                         <div>
-                                            <div className="score-card-sport">📍 {p.ubicacion}</div>
-                                            <div style={{ fontSize: '.77rem', color: 'var(--muted)', marginTop: '.25rem' }}>
-                                                {new Date(p.horario).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
-                                                {'  ·  '}
-                                                {new Date(p.horario).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                                            <div className="score-card-sport">📍 {p.barrio || p.ubicacion}</div>
+                                            <div style={{ fontSize: '.77rem', color: 'var(--muted)', marginTop: '.2rem' }}>
+                                                ⏱ {p.duracionMinutos} min &nbsp;·&nbsp;
+                                                🗓 {new Date(p.horario).toLocaleDateString('es-AR')} {new Date(p.horario).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                            <div style={{ fontSize: '.77rem', color: 'var(--muted)' }}>
+                                                📊 {p.nivelMinimo} – {p.nivelMaximo}
                                             </div>
                                         </div>
-                                        <div className="score-card-players">
-                                            {p.jugadoresActuales}<span>/{p.cantidadJugadores}</span>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div className="score-card-players">
+                                                {p.jugadoresActuales}<span>/{p.cantidadJugadores}</span>
+                                            </div>
+                                            <div style={{ fontSize: '.7rem', color: 'var(--muted)', textTransform: 'uppercase' }}>jugadores</div>
                                         </div>
                                     </div>
+
+                                    {/* Roster inline */}
+                                    {p.jugadores && p.jugadores.length > 0 && (
+                                        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '.5rem', marginTop: '.1rem' }}>
+                                            <div style={{ fontSize: '.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.08em', color: 'var(--muted)', marginBottom: '.35rem' }}>
+                                                ROSTER ({p.jugadores.length})
+                                            </div>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem' }}>
+                                                {p.jugadores.map(j => (
+                                                    <span key={j.id} style={{
+                                                        fontSize: '.72rem', fontWeight: 600,
+                                                        background: 'var(--bg)', borderRadius: 3,
+                                                        padding: '.15rem .45rem',
+                                                        border: '1px solid var(--border)',
+                                                        color: 'var(--muted)',
+                                                    }}>
+                                                        {j.nombre}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -83,7 +127,10 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
                             : Object.entries(byEstado).map(([est, n]) => (
                                 <div className="stand-row" key={est}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
-                                        <span className={`badge ${estadoBadge(est)}`}>{est}</span>
+                                        {est === 'En juego'
+                                            ? <span className="badge badge-live">● LIVE</span>
+                                            : <span className={`badge ${estadoBadge(est)}`}>{est}</span>
+                                        }
                                     </div>
                                     <div style={{ fontFamily: "'Barlow Condensed'", fontWeight: 900, fontSize: '1.2rem' }}>{n}</div>
                                 </div>
@@ -100,7 +147,7 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
                             <button className="btn btn-outline btn-sm" onClick={() => onNavigate('usuarios')}>VER TODOS →</button>
                         </div>
                         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius)' }}>
-                            {usuarios.slice(0, 6).map((u, i) => (
+                            {usuariosConPartidos.map((u, i) => (
                                 <div className="stand-row" key={u.id}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
                                         <span className="number">{i + 1}</span>
@@ -109,10 +156,12 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
                                             <div style={{ fontSize: '.72rem', color: 'var(--muted)' }}>{u.nivel}</div>
                                         </div>
                                     </div>
-                                    <div style={{ fontSize: '.77rem', color: 'var(--muted)' }}>{u.ciudad || '—'}</div>
+                                    <div style={{ fontFamily: "'Barlow Condensed'", fontWeight: 800, fontSize: '1rem', color: u.partidosCount > 0 ? 'var(--text)' : 'var(--muted)' }}>
+                                        {u.partidosCount}
+                                    </div>
                                 </div>
                             ))}
-                            {usuarios.length === 0 && <div className="empty">— SIN JUGADORES —</div>}
+                            {usuariosConPartidos.length === 0 && <div className="empty">— SIN JUGADORES —</div>}
                         </div>
                     </div>
                 </div>

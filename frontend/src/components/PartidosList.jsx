@@ -94,7 +94,7 @@ export default function PartidosList({ partidos, usuarios, deportes, barrios, cu
                                     <div className="score-card-sport">📍 {p.barrio}</div>
                                     <div style={{ fontSize: '.77rem', color: 'var(--muted)', marginTop: '.2rem' }}>
                                         ⏱ {p.duracionMinutos} min &nbsp;·&nbsp;
-                                        🗓 {new Date(p.horario).toLocaleDateString('es-AR')}
+                                        🗓 {new Date(p.horario).toLocaleDateString('es-AR')} {new Date(p.horario).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                                     </div>
                                     <div style={{ fontSize: '.77rem', color: 'var(--muted)' }}>
                                         📊 {p.nivelMinimo} – {p.nivelMaximo}
@@ -167,7 +167,7 @@ export default function PartidosList({ partidos, usuarios, deportes, barrios, cu
                                 {/* Transiciones de estado: solo owner */}
                                 {isOwner(p) && p.estado === 'Confirmado' && (
                                     <button className="btn btn-success btn-sm"
-                                        onClick={() => doAction(() => api.iniciarPartido(p.id, currentUser.id))}>▶ INICIAR</button>
+                                        onClick={() => doAction(() => api.iniciarPartido(p.id, currentUser.id))}>▶ ADELANTAR</button>
                                 )}
                                 {isOwner(p) && p.estado === 'En juego' && (
                                     <button className="btn btn-info btn-sm"

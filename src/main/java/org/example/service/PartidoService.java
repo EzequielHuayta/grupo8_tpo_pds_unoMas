@@ -20,7 +20,7 @@ public class PartidoService {
     }
 
     public Partido crearPartido(Deporte deporte, int cantidadJugadores, int duracionMinutos,
-                                 Ubicacion ubicacion, LocalDateTime horario) {
+            Ubicacion ubicacion, LocalDateTime horario) {
         Partido partido = new Partido(partidoRepository.generarId(), deporte, cantidadJugadores,
                 duracionMinutos, ubicacion, horario);
         partidoRepository.guardar(partido);
@@ -31,8 +31,13 @@ public class PartidoService {
     }
 
     public Partido crearPartido(Deporte deporte, int cantidadJugadores, int duracionMinutos,
-                                 Ubicacion ubicacion, LocalDateTime horario,
-                                 NivelState nivelMinimo, NivelState nivelMaximo) {
+            Ubicacion ubicacion, LocalDateTime horario,
+            NivelState nivelMinimo, NivelState nivelMaximo) {
+        if (nivelMinimo.getPesoNivel() > nivelMaximo.getPesoNivel()) {
+            throw new IllegalArgumentException(
+                    "El nivel mínimo (" + nivelMinimo.getNombre() + ") no puede ser mayor que el máximo ("
+                            + nivelMaximo.getNombre() + ").");
+        }
         Partido partido = crearPartido(deporte, cantidadJugadores, duracionMinutos, ubicacion, horario);
         partido.setNivelMinimo(nivelMinimo);
         partido.setNivelMaximo(nivelMaximo);

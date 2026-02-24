@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { api } from '../api';
+import NivelRangeSlider from './NivelRangeSlider';
 
-const NIVELES = ['Principiante', 'Intermedio', 'Avanzado'];
 const DEFAULT = {
     deporteId: '', cantidadJugadores: 5, duracionMinutos: 90,
-    barrio: '',
-    horario: '', nivelMinimo: 'Principiante', nivelMaximo: 'Avanzado',
+    barrio: '', horario: '',
+    nivelMinimo: 'Principiante', nivelMaximo: 'Avanzado',
 };
 
 export default function CreatePartidoModal({ deportes, barrios, currentUser, onClose, onCreated, toast }) {
@@ -17,7 +17,7 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
     const submit = async e => {
         e.preventDefault();
         if (!form.deporteId || !form.barrio || !form.horario) {
-            toast('Completa todos los campos requeridos', 'error');
+            toast('Completá todos los campos requeridos', 'error');
             return;
         }
         setLoading(true);
@@ -29,7 +29,6 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
                 duracionMinutos: Number(form.duracionMinutos),
                 creadorId: currentUser ? currentUser.id : null,
             });
-            // Sumarse automáticamente al partido recién creado
             if (currentUser && partido && partido.id) {
                 await api.agregarJugador(partido.id, currentUser.id);
             }
@@ -42,7 +41,8 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
     };
 
     return (
-        <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+        /* ← Se quitó el onClick del backdrop; solo se cierra con el botón CANCELAR */
+        <div className="modal-backdrop">
             <div className="modal">
                 <div className="modal-title">🏟 NUEVO PARTIDO</div>
                 <form onSubmit={submit}>
@@ -81,25 +81,19 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
                             onChange={e => set('horario', e.target.value)} />
                     </div>
 
-                    <div className="form-row">
-                        <div className="form-group">
-                            <label className="form-label">Nivel mínimo</label>
-                            <select className="form-control" value={form.nivelMinimo} onChange={e => set('nivelMinimo', e.target.value)}>
-                                {NIVELES.map(n => <option key={n}>{n}</option>)}
-                            </select>
-                        </div>
-                        <div className="form-group">
-                            <label className="form-label">Nivel máximo</label>
-                            <select className="form-control" value={form.nivelMaximo} onChange={e => set('nivelMaximo', e.target.value)}>
-                                {NIVELES.map(n => <option key={n}>{n}</option>)}
-                            </select>
-                        </div>
+                    <div className="form-group">
+                        <label className="form-label">Rango de nivel</label>
+                        <NivelRangeSlider
+                            nivelMin={form.nivelMinimo}
+                            nivelMax={form.nivelMaximo}
+                            onChange={(min, max) => setForm(f => ({ ...f, nivelMinimo: min, nivelMaximo: max }))}
+                        />
                     </div>
 
                     <div className="modal-footer">
-                        <button type="button" className="btn btn-outline" onClick={onClose}>Cancelar</button>
+                        <button type="button" className="btn btn-outline" onClick={onClose}>CANCELAR</button>
                         <button type="submit" className="btn btn-primary" disabled={loading}>
-                            {loading ? 'Creando…' : 'Crear partido'}
+                            {loading ? 'CREANDO…' : 'CREAR PARTIDO'}
                         </button>
                     </div>
                 </form>

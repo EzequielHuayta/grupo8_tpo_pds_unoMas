@@ -428,6 +428,11 @@ body {
   animation: pulse .8s ease-in-out infinite;
 }
 
+.badge-orange {
+  background: #2a1200;
+  color: #ff9800;
+}
+
 @keyframes pulse {
 
   0%,
