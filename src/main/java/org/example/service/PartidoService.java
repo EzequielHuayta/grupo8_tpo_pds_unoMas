@@ -14,9 +14,11 @@ import java.util.stream.Collectors;
 @Service
 public class PartidoService {
     private final IPartidoRepository partidoRepository;
+    private final DeporteService deporteService;
 
-    public PartidoService(IPartidoRepository partidoRepository) {
+    public PartidoService(IPartidoRepository partidoRepository, DeporteService deporteService) {
         this.partidoRepository = partidoRepository;
+        this.deporteService = deporteService;
     }
 
     public Partido crearPartido(Deporte deporte, int cantidadJugadores, int duracionMinutos,
@@ -24,8 +26,7 @@ public class PartidoService {
         Partido partido = new Partido(partidoRepository.generarId(), deporte, cantidadJugadores,
                 duracionMinutos, ubicacion, horario);
         partidoRepository.guardar(partido);
-        partido.agregarObserver(deporte);
-        partido.notificarObservers();
+        deporteService.notificarNuevoPartido(partido);
         System.out.println("Partido creado: " + partido);
         return partido;
     }

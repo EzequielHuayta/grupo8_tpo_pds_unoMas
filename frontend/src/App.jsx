@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 import { api } from './api';
 import { initials } from './utils';
@@ -12,6 +12,144 @@ export const SPORT_ICONS = { 'Fútbol': '⚽', 'Básquet': '🏀', 'Tenis': '�
 
 const SESSION_KEY = 'unomas_user';
 
+// ─── BellIcon ───────────────────────────────────────────────────────────────
+function BellIcon({ userId }) {
+  const [notifs, setNotifs] = useState([]);
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef(null);
+
+  // Polling each 5s
+  useEffect(() => {
+    if (!userId) return;
+    const poll = async () => {
+      try {
+        const lista = await api.getNotificaciones(userId);
+        setNotifs(lista || []);
+      } catch { /* servidor no disponible, silenciar */ }
+    };
+    poll();
+    const t = setInterval(poll, 5000);
+    return () => clearInterval(t);
+  }, [userId]);
+
+  // Cierra el panel si se hace click fuera
+  useEffect(() => {
+    const handler = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleOpen = () => {
+    setOpen(o => !o);
+  };
+
+  const handleLeer = async () => {
+    await api.leerNotificaciones(userId);
+    setNotifs([]);
+    setOpen(false);
+  };
+
+  const unread = notifs.length;
+
+  return (
+    <div ref={panelRef} style={{ position: 'relative' }}>
+      {/* Botón campanita */}
+      <button
+        onClick={handleOpen}
+        title="Notificaciones"
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          position: 'relative', display: 'flex', alignItems: 'center',
+          padding: '4px',
+        }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+        {unread > 0 && (
+          <span style={{
+            position: 'absolute', top: '-2px', right: '-2px',
+            background: 'var(--red)', color: 'white',
+            borderRadius: '50%', fontSize: '10px', fontWeight: 900,
+            minWidth: '16px', height: '16px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '0 3px', lineHeight: 1,
+            fontFamily: "'Barlow Condensed', sans-serif",
+            boxShadow: '0 0 0 2px var(--bg)',
+          }}>
+            {unread > 99 ? '99+' : unread}
+          </span>
+        )}
+      </button>
+
+      {/* Panel desplegable */}
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 8px)', right: 0,
+          width: '320px', maxHeight: '360px',
+          background: 'var(--surface)', border: '1px solid var(--border)',
+          borderRadius: 'var(--radius)', boxShadow: '0 8px 24px rgba(0,0,0,.5)',
+          zIndex: 1000, display: 'flex', flexDirection: 'column',
+          overflow: 'hidden',
+        }}>
+          {/* Header panel */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '.6rem .9rem', borderBottom: '1px solid var(--border)',
+          }}>
+            <span style={{
+              fontFamily: "'Barlow Condensed'", fontWeight: 800,
+              fontSize: '.85rem', letterSpacing: '.08em', color: 'var(--text)',
+            }}>
+              🔔 NOTIFICACIONES {unread > 0 && <span style={{ color: 'var(--red)' }}>({unread})</span>}
+            </span>
+            {unread > 0 && (
+              <button onClick={handleLeer} style={{
+                background: 'none', border: '1px solid var(--border)',
+                borderRadius: '4px', color: 'var(--muted)',
+                fontSize: '.7rem', padding: '2px 6px', cursor: 'pointer',
+                fontFamily: "'Barlow Condensed'", fontWeight: 700, letterSpacing: '.05em',
+              }}>
+                MARCAR LEÍDAS
+              </button>
+            )}
+          </div>
+
+          {/* Lista */}
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            {notifs.length === 0
+              ? (
+                <div style={{
+                  color: 'var(--muted)', fontSize: '.8rem', textAlign: 'center',
+                  padding: '1.5rem',
+                }}>
+                  Sin notificaciones nuevas
+                </div>
+              )
+              : notifs.map((msg, i) => (
+                <div key={i} style={{
+                  padding: '.65rem .9rem',
+                  borderBottom: i < notifs.length - 1 ? '1px solid var(--border)' : 'none',
+                  fontSize: '.82rem', color: 'var(--text)', lineHeight: 1.45,
+                  display: 'flex', gap: '.5rem', alignItems: 'flex-start',
+                }}>
+                  <span style={{ color: 'var(--red)', flexShrink: 0 }}>●</span>
+                  {msg}
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── App ─────────────────────────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState('dashboard');
   const [partidos, setPartidos] = useState([]);
@@ -64,6 +202,9 @@ export default function App() {
     `${SPORT_ICONS[p.deporte] || '🏟'} ${p.deporte.toUpperCase()} · ${p.barrio} · ${p.jugadoresActuales}/${p.cantidadJugadores} · EN JUEGO`
   );
 
+  // La campanita solo aplica a usuarios con estrategia In-App
+  const esInApp = currentUser && currentUser.notificacion === 'In-App';
+
   return (
     <div className="app">
       <header className="header">
@@ -78,6 +219,9 @@ export default function App() {
         <div style={{ display: 'flex', gap: '.5rem', alignItems: 'center' }}>
           {currentUser ? (
             <>
+              {/* Campanita — solo para usuarios In-App */}
+              {esInApp && <BellIcon userId={currentUser.id} />}
+
               <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
                 <div className="avatar" style={{ width: 32, height: 32, fontSize: '.75rem' }}>
                   {initials(currentUser.nombreUsuario)}
@@ -103,15 +247,12 @@ export default function App() {
               const base = tickerItems.length > 0
                 ? tickerItems
                 : ['📅 No hay ningún partido en juego ahora mismo ¡Andá a MIS PARTIDOS y creá el próximo!'];
-              // Repeat 10x so content always overflows → animation -50% loops seamlessly
               return Array.from({ length: 10 }, () => base).flat()
                 .map((t, i) => <span key={i}>{t}</span>);
             })()}
           </div>
         </div>
       </div>
-
-
 
       <main className="main">
         {loading && <div className="spinner" />}
@@ -133,7 +274,7 @@ export default function App() {
             onRefresh={load} toast={toast}
           />}
         {!loading && page === 'usuarios' &&
-          <UsuariosList usuarios={usuarios} partidos={partidos} barrios={barrios} currentUser={currentUser} onRefresh={load} toast={toast} />}
+          <UsuariosList usuarios={usuarios} partidos={partidos} deportes={deportes} barrios={barrios} currentUser={currentUser} onRefresh={load} toast={toast} />}
       </main>
 
       {showLogin && (

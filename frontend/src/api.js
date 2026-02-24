@@ -9,6 +9,7 @@ async function req(path, options = {}) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || 'Error en la solicitud');
   }
+  if (res.status === 204 || res.headers.get('content-length') === '0') return null;
   return res.json();
 }
 
@@ -32,4 +33,7 @@ export const api = {
   login: (body) => req('/usuarios/login', { method: 'POST', body: JSON.stringify(body) }),
   loginSimple: (nombre) => req('/usuarios/login-simple', { method: 'POST', body: JSON.stringify({ nombreUsuario: nombre }) }),
   cambiarNivel: (id, nivel) => req(`/usuarios/${id}/nivel`, { method: 'PUT', body: JSON.stringify({ nivel }) }),
+  modificarUsuario: (id, body) => req(`/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  getNotificaciones: (id) => req(`/usuarios/${id}/notificaciones`),
+  leerNotificaciones: (id) => req(`/usuarios/${id}/notificaciones`, { method: 'DELETE' }).catch(() => { }),
 };

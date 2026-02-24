@@ -64,6 +64,22 @@ public class Partido implements ISubject {
         }
     }
 
+    public void notificarJugadores(String mensaje) {
+        System.out.println("[Partido #" + idPartido + "] Notificando " + jugadores.size()
+                + " jugador(es). Mensaje: \"" + mensaje + "\"");
+        Notificacion notificacion = new Notificacion(mensaje);
+        for (Jugador jugador : jugadores) {
+            Usuario u = jugador.getJugador();
+            System.out.println("  → Jugador: " + u.getNombreUsuario()
+                    + " (ID " + u.getIdUsuario() + ")"
+                    + " | Estrategia: "
+                    + (u.getEstrategiaNotificacion() != null
+                            ? u.getEstrategiaNotificacion().getClass().getSimpleName()
+                            : "ninguna"));
+            u.recibirNotificacion(notificacion);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Métodos que delegan al estado (Context → State)
     // -------------------------------------------------------------------------

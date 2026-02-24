@@ -188,7 +188,7 @@ export default function BuscarPartidos({ currentUser, onLoginRequired, onRefresh
 
                                 <div className="score-card-body">
                                     <div>
-                                        <div className="score-card-sport">📍 {p.ubicacion}</div>
+                                        <div className="score-card-sport">📍 {p.barrio || '—'}</div>
                                         <div style={{ fontSize: '.77rem', color: 'var(--muted)', marginTop: '.2rem' }}>
                                             ⏱ {p.duracionMinutos} min &nbsp;·&nbsp;
                                             🗓 {new Date(p.horario).toLocaleDateString('es-AR')} {new Date(p.horario).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}

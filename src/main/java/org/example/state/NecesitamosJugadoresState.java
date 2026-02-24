@@ -19,7 +19,8 @@ public class NecesitamosJugadoresState implements IPartidoState {
         if (partido.getJugadores().size() >= partido.getCantidadJugadores()) {
             partido.setEstado(new ArmadoState());
             System.out.println("Partido #" + partido.getIdPartido() + " → Armado");
-            partido.notificarObservers();
+            partido.notificarJugadores("Tu partido con ID#" + partido.getIdPartido()
+                    + " ya se encuentra completo, ¡confirma tu asistencía!");
         } else {
             System.out.println("Partido #" + partido.getIdPartido()
                     + ": aún faltan jugadores ("

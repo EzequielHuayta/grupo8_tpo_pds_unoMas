@@ -23,7 +23,8 @@ public class ArmadoState implements IPartidoState {
         if (todosConfirmados) {
             partido.setEstado(new ConfirmadoState());
             System.out.println("Partido #" + partido.getIdPartido() + " → Confirmado");
-            partido.notificarObservers();
+            partido.notificarJugadores("Tu partido con ID#" + partido.getIdPartido()
+                    + " ya se encuentra confirmado, ¡Revisá el horario y a jugar!");
         } else {
             System.out.println("Partido #" + partido.getIdPartido()
                     + ": aún faltan jugadores por confirmar.");

@@ -7,6 +7,7 @@ import org.example.nivel.NivelState;
 import org.example.nivel.Principiante;
 import org.example.service.PartidoService;
 import org.example.service.UsuarioService;
+import org.example.service.DeporteService;
 import org.example.strategy.EmparejadorHistorialStrategy;
 import org.example.strategy.EmparejadorNivelStrategy;
 import org.example.strategy.EmparejadorUbicacionStrategy;
@@ -27,13 +28,7 @@ public class PartidoController {
 
     private final PartidoService partidoService;
     private final UsuarioService usuarioService;
-
-    private static final List<Deporte> DEPORTES = Arrays.asList(
-            new Deporte(1L, "Fútbol"),
-            new Deporte(2L, "Básquet"),
-            new Deporte(3L, "Tenis"),
-            new Deporte(4L, "Vóley"),
-            new Deporte(5L, "Paddle"));
+    private final DeporteService deporteService;
 
     private static final String BARRIOS_FILE = "data/barrios.txt";
 
@@ -50,9 +45,11 @@ public class PartidoController {
             "Villa Ortúzar", "Villa Pueyrredón", "Villa Real", "Villa Riachuelo",
             "Villa Santa Rita", "Villa Soldati", "Villa Urquiza", "Vélez Sársfield");
 
-    public PartidoController(PartidoService partidoService, UsuarioService usuarioService) {
+    public PartidoController(PartidoService partidoService, UsuarioService usuarioService,
+            DeporteService deporteService) {
         this.partidoService = partidoService;
         this.usuarioService = usuarioService;
+        this.deporteService = deporteService;
     }
 
     @PostConstruct
@@ -95,10 +92,7 @@ public class PartidoController {
     public ResponseEntity<?> crearPartido(@RequestBody Map<String, Object> body) {
         try {
             Long deporteId = Long.valueOf(body.get("deporteId").toString());
-            Deporte deporte = DEPORTES.stream()
-                    .filter(d -> d.getIdDeporte().equals(deporteId))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Deporte no encontrado"));
+            Deporte deporte = deporteService.buscarPorId(deporteId);
 
             int cantJugadores = Integer.parseInt(body.get("cantidadJugadores").toString());
             int duracion = Integer.parseInt(body.get("duracionMinutos").toString());
@@ -247,7 +241,7 @@ public class PartidoController {
     @GetMapping("/deportes")
     public List<Map<String, Object>> listarDeportes() {
         List<Map<String, Object>> result = new ArrayList<>();
-        for (Deporte d : DEPORTES) {
+        for (Deporte d : deporteService.getDeportes()) {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", d.getIdDeporte());
             m.put("nombre", d.getNombre());

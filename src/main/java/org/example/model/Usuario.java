@@ -45,7 +45,7 @@ public class Usuario implements IObserver {
         return estrategiaEmparejamiento.buscarPartido(this, partidosDisponibles);
     }
 
-    public void cambiarEstrategiaNotificacion(INotificacionStrategy estrategia) {
+    public void setEstrategiaNotificacion(INotificacionStrategy estrategia) {
         this.estrategiaNotificacion = estrategia;
     }
 
