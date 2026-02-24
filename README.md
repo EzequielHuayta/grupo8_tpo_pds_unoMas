@@ -176,12 +176,3 @@ La app abre en `http://localhost:5173`
 | 5 | **Emparejamiento** | 3 algoritmos: nivel de habilidad, cercanía geográfica, historial |
 | 6 | **Notificaciones** | Email (JavaMail) e In-App (push simulado), en cada cambio de estado |
 | 7 | **Transiciones automáticas** | Scheduler cada 60s: Confirmado → En juego, En juego → Finalizado |
-
-## 👥 Grupo 8
-
-| Nombre | LU |
-|---|---|
-| *Completar* | *XXXXX* |
-| *Completar* | *XXXXX* |
-| *Completar* | *XXXXX* |
-| *Completar* | *XXXXX* |
