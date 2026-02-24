@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Usuario implements IObserver {
-    private Long idUsuario;
+    private final Long idUsuario;
     private String nombreUsuario;
     private String email;
     private String contrasena;
@@ -19,7 +19,7 @@ public class Usuario implements IObserver {
     private INotificacionStrategy estrategiaNotificacion;
     private IEmparejadorStrategy estrategiaEmparejamiento;
     private Ubicacion ubicacion;
-    private List<Partido> historialPartidos;
+    private List<Long> historialPartidoIds;
 
     public Usuario(Long idUsuario, String nombreUsuario, String email, String contrasena) {
         this.idUsuario = idUsuario;
@@ -27,7 +27,7 @@ public class Usuario implements IObserver {
         this.email = email;
         this.contrasena = contrasena;
         this.nivel = new Principiante();
-        this.historialPartidos = new ArrayList<>();
+        this.historialPartidoIds = new ArrayList<>();
     }
 
     @Override
@@ -114,12 +114,27 @@ public class Usuario implements IObserver {
         this.ubicacion = ubicacion;
     }
 
-    public List<Partido> getHistorialPartidos() {
-        return historialPartidos;
+    public List<Long> getHistorialPartidoIds() {
+        return historialPartidoIds;
     }
 
     public void agregarPartidoAlHistorial(Partido partido) {
-        this.historialPartidos.add(partido);
+        Long pid = partido.getIdPartido();
+        if (!historialPartidoIds.contains(pid)) {
+            historialPartidoIds.add(pid);
+        }
+    }
+
+    /**
+     * Cuenta cuántos partidos del historial están en estado "Finalizado".
+     * 
+     * @param todosLosPartidos lista completa de partidos del sistema
+     */
+    public int getCantidadPartidosCompletados(List<Partido> todosLosPartidos) {
+        return (int) todosLosPartidos.stream()
+                .filter(p -> historialPartidoIds.contains(p.getIdPartido()))
+                .filter(p -> "Finalizado".equals(p.getEstado().getNombre()))
+                .count();
     }
 
     @Override

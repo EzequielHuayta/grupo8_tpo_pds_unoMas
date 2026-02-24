@@ -16,7 +16,7 @@ import java.util.Optional;
 
 /**
  * Persists users in data/usuarios.txt
- * Format per line: id|nombreUsuario|email|contrasena|nivelPeso|barrio
+ * Format per line: id|nombreUsuario|email|contrasena|nivelPeso|barrio|1,3,7
  */
 @Repository
 public class UsuarioRepositoryImpl implements IUsuarioRepository {
@@ -29,27 +29,41 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
     public void cargar() {
         new File("data").mkdirs();
         File file = new File(FILE_PATH);
-        if (!file.exists()) return;
+        if (!file.exists())
+            return;
 
         try (BufferedReader br = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = br.readLine()) != null) {
-                if (line.trim().isEmpty()) continue;
+                if (line.trim().isEmpty())
+                    continue;
                 String[] p = line.split("\\|", -1);
                 // id|nombre|email|contrasena|nivelPeso|barrio
-                Long id         = Long.parseLong(p[0]);
-                String nombre   = p[1];
-                String email    = p[2];
-                String contra   = p[3];
-                int nivelPeso   = Integer.parseInt(p[4]);
-                String barrio   = p.length > 5 ? p[5] : "";
+                Long id = Long.parseLong(p[0]);
+                String nombre = p[1];
+                String email = p[2];
+                String contra = p[3];
+                int nivelPeso = Integer.parseInt(p[4]);
+                String barrio = p.length > 5 ? p[5] : "";
+                String historial = p.length > 6 ? p[6] : "";
 
                 Usuario u = new Usuario(id, nombre, email, contra);
                 u.setUbicacion(new Ubicacion(barrio));
                 u.setNivel(nivelDesde(nivelPeso));
+
+                // Restore partido IDs
+                if (!historial.isEmpty()) {
+                    for (String idStr : historial.split(",")) {
+                        try {
+                            u.getHistorialPartidoIds().add(Long.parseLong(idStr.trim()));
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                }
                 usuarios.add(u);
 
-                if (id >= nextId) nextId = id + 1;
+                if (id >= nextId)
+                    nextId = id + 1;
             }
             System.out.println("[UsuarioRepo] Cargados " + usuarios.size() + " usuarios desde " + FILE_PATH);
         } catch (IOException e) {
@@ -62,12 +76,16 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
         try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_PATH))) {
             for (Usuario u : usuarios) {
                 String barrio = u.getUbicacion() != null ? u.getUbicacion().getBarrio() : "";
+                String historial = u.getHistorialPartidoIds().stream()
+                        .map(String::valueOf)
+                        .collect(java.util.stream.Collectors.joining(","));
                 pw.println(u.getIdUsuario() + "|"
                         + u.getNombreUsuario() + "|"
                         + u.getEmail() + "|"
                         + u.getContrasena() + "|"
                         + u.getNivel().getPesoNivel() + "|"
-                        + barrio);
+                        + barrio + "|"
+                        + historial);
             }
         } catch (IOException e) {
             System.err.println("[UsuarioRepo] Error al persistir: " + e.getMessage());
@@ -116,9 +134,12 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
 
     private NivelState nivelDesde(int peso) {
         switch (peso) {
-            case 2:  return new Intermedio();
-            case 3:  return new Avanzado();
-            default: return new Principiante();
+            case 2:
+                return new Intermedio();
+            case 3:
+                return new Avanzado();
+            default:
+                return new Principiante();
         }
     }
 }

@@ -56,9 +56,15 @@ public class UsuarioService {
         return usuarioRepository.listarTodos();
     }
 
+    public void guardar(Usuario usuario) {
+        usuarioRepository.guardar(usuario);
+    }
+
     public void guardarPartido(Usuario usuario, Partido partido) {
         usuario.agregarPartidoAlHistorial(partido);
-        System.out.println("Partido #" + partido.getIdPartido() + " guardado en historial de " + usuario.getNombreUsuario());
+        usuarioRepository.guardar(usuario);
+        System.out.println(
+                "Partido #" + partido.getIdPartido() + " guardado en historial de " + usuario.getNombreUsuario());
     }
 
     public Usuario buscarPorId(Long id) {

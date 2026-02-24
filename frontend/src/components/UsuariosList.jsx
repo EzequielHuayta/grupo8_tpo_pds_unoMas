@@ -50,10 +50,6 @@ export default function UsuariosList({ usuarios, partidos, barrios, currentUser,
                         <span>#</span><span></span><span>JUGADOR</span><span>BARRIO</span><span>PARTIDOS</span><span>NIVEL</span><span>CAMBIAR</span>
                     </div>
                     {usuarios.map((u, i) => {
-                        const partidosCount = partidos.filter(p =>
-                            (p.creadorId && Number(p.creadorId) === Number(u.id)) ||
-                            (p.jugadores && p.jugadores.some(j => j.nombre === u.nombreUsuario))
-                        ).length;
                         const esMiPerfil = currentUser && Number(currentUser.id) === Number(u.id);
                         return (
                             <div key={u.id} className="usuario-row" style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 70px 120px 100px', gap: '.75rem', alignItems: 'center' }}>
@@ -65,7 +61,7 @@ export default function UsuariosList({ usuarios, partidos, barrios, currentUser,
                                 </div>
                                 <div className="usuario-meta">📍 {u.barrio || '—'}</div>
                                 <span style={{ fontFamily: "'Barlow Condensed'", fontWeight: 700, fontSize: '.95rem', color: 'var(--text)', textAlign: 'center' }}>
-                                    {partidosCount}
+                                    {u.cantidadPartidosCompletados || 0}
                                 </span>
                                 <span className={`badge ${nivelBadge(u.nivel)}`}>{u.nivel.toUpperCase()}</span>
                                 {esMiPerfil

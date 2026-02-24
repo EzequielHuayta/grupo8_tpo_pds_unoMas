@@ -2,7 +2,7 @@ export function estadoBadge(estado) {
     const map = {
         'Necesitamos jugadores': 'badge-orange',
         'Partido armado': 'badge-yellow',
-        'Confirmado': 'badge-indigo',
+        'Confirmado': 'badge-blue',
         'En juego': 'badge-green',
         'Finalizado': 'badge-green',
         'Cancelado': 'badge-red',

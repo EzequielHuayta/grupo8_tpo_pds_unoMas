@@ -1,4 +1,4 @@
-package org.example.rest;
+package org.example.controllers;
 
 import org.example.model.*;
 import org.example.nivel.Avanzado;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/partidos")
 @CrossOrigin(origins = "*")
-public class PartidoRestController {
+public class PartidoController {
 
     private final PartidoService partidoService;
     private final UsuarioService usuarioService;
@@ -33,8 +33,7 @@ public class PartidoRestController {
             new Deporte(2L, "Básquet"),
             new Deporte(3L, "Tenis"),
             new Deporte(4L, "Vóley"),
-            new Deporte(5L, "Paddle")
-    );
+            new Deporte(5L, "Paddle"));
 
     private static final String BARRIOS_FILE = "data/barrios.txt";
 
@@ -49,22 +48,23 @@ public class PartidoRestController {
             "San Telmo", "Versalles", "Villa Crespo", "Villa del Parque",
             "Villa Devoto", "Villa General Mitre", "Villa Lugano", "Villa Luro",
             "Villa Ortúzar", "Villa Pueyrredón", "Villa Real", "Villa Riachuelo",
-            "Villa Santa Rita", "Villa Soldati", "Villa Urquiza", "Vélez Sársfield"
-    );
+            "Villa Santa Rita", "Villa Soldati", "Villa Urquiza", "Vélez Sársfield");
 
-    public PartidoRestController(PartidoService partidoService, UsuarioService usuarioService) {
+    public PartidoController(PartidoService partidoService, UsuarioService usuarioService) {
         this.partidoService = partidoService;
         this.usuarioService = usuarioService;
     }
 
     @PostConstruct
     public void inicializar() {
-        // Sincronizar el txt con la lista hardcodeada (siempre sobreescribe para mantener UTF-8)
+        // Sincronizar el txt con la lista hardcodeada (siempre sobreescribe para
+        // mantener UTF-8)
         new File("data").mkdirs();
         try (PrintWriter pw = new PrintWriter(
                 new java.io.OutputStreamWriter(
                         new java.io.FileOutputStream(BARRIOS_FILE), java.nio.charset.StandardCharsets.UTF_8))) {
-            for (String b : BARRIOS) pw.println(b);
+            for (String b : BARRIOS)
+                pw.println(b);
             System.out.println("[BarriosRepo] " + BARRIOS.size() + " barrios disponibles.");
         } catch (IOException e) {
             System.err.println("[BarriosRepo] Error al escribir: " + e.getMessage());
@@ -100,13 +100,14 @@ public class PartidoRestController {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Deporte no encontrado"));
 
-            int cantJugadores  = Integer.parseInt(body.get("cantidadJugadores").toString());
-            int duracion       = Integer.parseInt(body.get("duracionMinutos").toString());
-            String barrio      = body.get("barrio").toString();
+            int cantJugadores = Integer.parseInt(body.get("cantidadJugadores").toString());
+            int duracion = Integer.parseInt(body.get("duracionMinutos").toString());
+            String barrio = body.get("barrio").toString();
             LocalDateTime horario = LocalDateTime.parse(body.get("horario").toString());
 
             Long creadorId = body.containsKey("creadorId")
-                    ? Long.valueOf(body.get("creadorId").toString()) : null;
+                    ? Long.valueOf(body.get("creadorId").toString())
+                    : null;
 
             Ubicacion ubicacion = new Ubicacion(barrio);
             NivelState nivelMin = parseNivel(body.getOrDefault("nivelMinimo", "Principiante").toString());
@@ -130,6 +131,9 @@ public class PartidoRestController {
             Partido partido = partidoService.buscarPorId(id);
             Usuario usuario = usuarioService.buscarPorId(usuarioId);
             partidoService.agregarJugador(partido, usuario);
+            // Registrar partido en historial del jugador y persistirlo
+            usuario.agregarPartidoAlHistorial(partido);
+            usuarioService.guardar(usuario);
             return ResponseEntity.ok(toMap(partido));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
@@ -152,7 +156,7 @@ public class PartidoRestController {
     // PUT /api/partidos/{id}/iniciar?creadorId=1
     @PutMapping("/{id}/iniciar")
     public ResponseEntity<?> iniciarPartido(@PathVariable Long id,
-                                             @RequestParam(required = false) Long creadorId) {
+            @RequestParam(required = false) Long creadorId) {
         try {
             Partido partido = partidoService.buscarPorId(id);
             verificarPropietario(partido, creadorId);
@@ -168,7 +172,7 @@ public class PartidoRestController {
     // PUT /api/partidos/{id}/finalizar?creadorId=1
     @PutMapping("/{id}/finalizar")
     public ResponseEntity<?> finalizarPartido(@PathVariable Long id,
-                                               @RequestParam(required = false) Long creadorId) {
+            @RequestParam(required = false) Long creadorId) {
         try {
             Partido partido = partidoService.buscarPorId(id);
             verificarPropietario(partido, creadorId);
@@ -184,7 +188,7 @@ public class PartidoRestController {
     // PUT /api/partidos/{id}/cancelar?creadorId=1
     @PutMapping("/{id}/cancelar")
     public ResponseEntity<?> cancelarPartido(@PathVariable Long id,
-                                              @RequestParam(required = false) Long creadorId) {
+            @RequestParam(required = false) Long creadorId) {
         try {
             Partido partido = partidoService.buscarPorId(id);
             verificarPropietario(partido, creadorId);
@@ -206,7 +210,8 @@ public class PartidoRestController {
         try {
             Usuario usuario = usuarioService.buscarPorId(usuarioId);
 
-            // Solo partidos disponibles (aceptan jugadores) y donde el usuario aún no está inscripto
+            // Solo partidos disponibles (aceptan jugadores) y donde el usuario aún no está
+            // inscripto
             List<Partido> disponibles = partidoService.getPartidos().stream()
                     .filter(p -> p.getEstado().getNombre().equals("Necesitamos jugadores"))
                     .filter(p -> p.getJugadores().stream()
@@ -217,9 +222,15 @@ public class PartidoRestController {
             // Seleccionar estrategia
             IEmparejadorStrategy strategy;
             switch (estrategia.toUpperCase()) {
-                case "UBICACION": strategy = new EmparejadorUbicacionStrategy(); break;
-                case "HISTORIAL": strategy = new EmparejadorHistorialStrategy(); break;
-                default:          strategy = new EmparejadorNivelStrategy();     break;
+                case "UBICACION":
+                    strategy = new EmparejadorUbicacionStrategy();
+                    break;
+                case "HISTORIAL":
+                    strategy = new EmparejadorHistorialStrategy(partidoService.getPartidos());
+                    break;
+                default:
+                    strategy = new EmparejadorNivelStrategy();
+                    break;
             }
 
             List<Partido> resultado = strategy.buscarPartido(usuario, disponibles);
@@ -276,15 +287,18 @@ public class PartidoRestController {
             jugadores.add(jm);
         }
         m.put("jugadores", jugadores);
-        m.put("creadorId", p.getCreadorId());  // needed by frontend for owner check
+        m.put("creadorId", p.getCreadorId()); // needed by frontend for owner check
         return m;
     }
 
     private NivelState parseNivel(String nivel) {
         switch (nivel.toLowerCase()) {
-            case "intermedio": return new Intermedio();
-            case "avanzado":   return new Avanzado();
-            default:           return new Principiante();
+            case "intermedio":
+                return new Intermedio();
+            case "avanzado":
+                return new Avanzado();
+            default:
+                return new Principiante();
         }
     }
 
@@ -295,7 +309,8 @@ public class PartidoRestController {
      */
     private void verificarPropietario(Partido partido, Long creadorId) {
         Long owner = partido.getCreadorId();
-        if (owner == null || owner == 0 || creadorId == null) return; // no owner set → open
+        if (owner == null || owner == 0 || creadorId == null)
+            return; // no owner set → open
         if (!owner.equals(creadorId)) {
             throw new SecurityException("Solo el creador del partido puede realizar esta acción.");
         }

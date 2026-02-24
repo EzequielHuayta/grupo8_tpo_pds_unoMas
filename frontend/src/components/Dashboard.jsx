@@ -12,16 +12,9 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
         .reverse()
         .slice(0, 6);
 
-    // Cantidad de partidos por usuario (como creador o jugador), ordenado desc, top 10
-    const usuariosConPartidos = usuarios
-        .map(u => ({
-            ...u,
-            partidosCount: partidos.filter(p =>
-                (p.creadorId && Number(p.creadorId) === Number(u.id)) ||
-                (p.jugadores && p.jugadores.some(j => j.nombre === u.nombreUsuario))
-            ).length,
-        }))
-        .sort((a, b) => b.partidosCount - a.partidosCount)
+    // Top 10 jugadores por partidos finalizados (viene directo del backend)
+    const usuariosConPartidos = [...usuarios]
+        .sort((a, b) => (b.cantidadPartidosCompletados || 0) - (a.cantidadPartidosCompletados || 0))
         .slice(0, 10);
 
     return (
@@ -156,8 +149,8 @@ export default function Dashboard({ partidos, usuarios, onNavigate }) {
                                             <div style={{ fontSize: '.72rem', color: 'var(--muted)' }}>{u.nivel}</div>
                                         </div>
                                     </div>
-                                    <div style={{ fontFamily: "'Barlow Condensed'", fontWeight: 800, fontSize: '1rem', color: u.partidosCount > 0 ? 'var(--text)' : 'var(--muted)' }}>
-                                        {u.partidosCount}
+                                    <div style={{ fontFamily: "'Barlow Condensed'", fontWeight: 800, fontSize: '1rem', color: (u.cantidadPartidosCompletados || 0) > 0 ? 'var(--text)' : 'var(--muted)' }}>
+                                        {u.cantidadPartidosCompletados || 0}
                                     </div>
                                 </div>
                             ))}

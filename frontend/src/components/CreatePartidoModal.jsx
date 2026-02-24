@@ -56,7 +56,7 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label className="form-label">Jugadores máx.</label>
+                            <label className="form-label">Jugadores necesarios</label>
                             <input className="form-control" type="number" min="2" max="22" value={form.cantidadJugadores}
                                 onChange={e => set('cantidadJugadores', e.target.value)} />
                         </div>
