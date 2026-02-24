@@ -24,7 +24,7 @@ public class Partido implements ISubject {
     private NivelState nivelMinimo;
     private NivelState nivelMaximo;
     private List<IObserver> observers;
-    private Long creadorId;   // ID del usuario que creó el partido
+    private Long creadorId;
 
     public Partido(Long idPartido, Deporte deporte, int cantidadJugadores,
                    int duracionMinutos, Ubicacion ubicacion, LocalDateTime horario) {
