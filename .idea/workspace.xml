@@ -5,9 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ae416ff5-36f9-446c-8e2f-3220a208fe74" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/partidos.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/partidos.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/usuarios.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/usuarios.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/CreatePartidoModal.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/CreatePartidoModal.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/UsuariosList.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/UsuariosList.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/controllers/PartidoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/controllers/PartidoController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/repository/PartidoRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/repository/PartidoRepositoryImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/repository/UsuarioRepositoryImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/repository/UsuarioRepositoryImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/service/DeporteService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/service/DeporteService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/service/PartidoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/service/PartidoService.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

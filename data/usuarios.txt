@@ -1,2 +1,2 @@
-2|juan|juan@gmail.com|1234|1|Monte Castro|2|Email|1
-1|perez|perez@gmail.com|1234|1|Monte Castro|1,2|Email|1
+2|juan|juan@gmail.com|1234|1|Monte Castro|2,3,4|Email|1
+1|perez|perez@gmail.com|1234|1|Monte Castro|1,2,4|Email|4

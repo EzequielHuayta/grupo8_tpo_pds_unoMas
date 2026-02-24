@@ -107,8 +107,20 @@ public class PartidoController {
             NivelState nivelMin = parseNivel(body.getOrDefault("nivelMinimo", "Principiante").toString());
             NivelState nivelMax = parseNivel(body.getOrDefault("nivelMaximo", "Avanzado").toString());
 
+            // Validar que el nivel del creador esté dentro del rango del partido
+            if (creadorId != null) {
+                Usuario creador = usuarioService.buscarPorId(creadorId);
+                int pesoCreador = creador.getNivel().getPesoNivel();
+                if (pesoCreador < nivelMin.getPesoNivel() || pesoCreador > nivelMax.getPesoNivel()) {
+                    throw new IllegalArgumentException(
+                            "Tu nivel (" + creador.getNivel().getNombre()
+                            + ") no está dentro del rango " + nivelMin.getNombre()
+                            + " – " + nivelMax.getNombre());
+                }
+            }
+
             Partido partido = partidoService.crearPartido(deporte, cantJugadores, duracion,
-                    ubicacion, horario, nivelMin, nivelMax);
+                    ubicacion, horario, nivelMin, nivelMax, creadorId);
             partido.setCreadorId(creadorId);
             partidoService.guardar(partido);
 

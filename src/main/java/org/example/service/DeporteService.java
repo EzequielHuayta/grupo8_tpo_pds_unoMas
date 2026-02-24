@@ -37,7 +37,7 @@ public class DeporteService {
                 .orElseThrow(() -> new IllegalArgumentException("Deporte no encontrado con ID: " + id));
     }
 
-    public void notificarNuevoPartido(Partido partido) {
+    public void notificarNuevoPartido(Partido partido, Long creadorId) {
         Deporte deporte = partido.getDeporte();
         String mensaje = "¡Hay un nuevo partido con ID#" + partido.getIdPartido()
                 + " para tu deporte favorito " + deporte.getNombre() + "!";
@@ -49,6 +49,8 @@ public class DeporteService {
         List<Usuario> usuarios = usuarioRepository.listarTodos();
         int notificados = 0;
         for (Usuario usuario : usuarios) {
+            // No notificar al creador del partido
+            if (creadorId != null && usuario.getIdUsuario().equals(creadorId)) continue;
             Deporte fav = usuario.getDeporteFavorito();
             if (fav != null && fav.getIdDeporte().equals(deporte.getIdDeporte())) {
                 System.out.println("  → Notificando a " + usuario.getNombreUsuario()

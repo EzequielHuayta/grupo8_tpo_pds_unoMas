@@ -20,6 +20,18 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
             toast('Completá todos los campos requeridos', 'error');
             return;
         }
+        if (new Date(form.horario) <= new Date()) {
+            toast('La fecha y hora deben ser posteriores a ahora', 'error');
+            return;
+        }
+        const NIVELES = ['Principiante', 'Intermedio', 'Avanzado'];
+        const userNivel = currentUser ? NIVELES.indexOf(currentUser.nivel) : 0;
+        const minNivel = NIVELES.indexOf(form.nivelMinimo);
+        const maxNivel = NIVELES.indexOf(form.nivelMaximo);
+        if (userNivel < minNivel || userNivel > maxNivel) {
+            toast(`Tu nivel (${currentUser.nivel}) no está dentro del rango ${form.nivelMinimo} – ${form.nivelMaximo}`, 'error');
+            return;
+        }
         setLoading(true);
         try {
             const partido = await api.crearPartido({
@@ -62,7 +74,7 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
                         </div>
                         <div className="form-group">
                             <label className="form-label">Duración (min)</label>
-                            <input className="form-control" type="number" min="10" value={form.duracionMinutos}
+                            <input className="form-control" type="number" min="1" value={form.duracionMinutos}
                                 onChange={e => set('duracionMinutos', e.target.value)} />
                         </div>
                     </div>
@@ -78,6 +90,7 @@ export default function CreatePartidoModal({ deportes, barrios, currentUser, onC
                     <div className="form-group">
                         <label className="form-label">Fecha y hora *</label>
                         <input className="form-control" type="datetime-local" value={form.horario}
+                            min={(() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); })()}
                             onChange={e => set('horario', e.target.value)} />
                     </div>
 

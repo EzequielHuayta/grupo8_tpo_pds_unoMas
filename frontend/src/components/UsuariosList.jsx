@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { api } from '../api';
 import { nivelBadge, initials } from '../utils';
+import { SPORT_ICONS } from '../App';
 
 const DEFAULT = { nombreUsuario: '', email: '', barrio: '', nivel: 'Principiante', notificacion: 'Email', deporteFavoritoId: '' };
 const NIVELES = ['Principiante', 'Intermedio', 'Avanzado'];
@@ -67,13 +68,13 @@ export default function UsuariosList({ usuarios, partidos, deportes, barrios, cu
                 ? <div className="empty">— SIN JUGADORES AÚN —</div>
                 : <div style={{ display: 'flex', flexDirection: 'column', gap: '.5rem' }}>
                     {/* Table header */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 70px 120px 100px', gap: '.75rem', padding: '.4rem .75rem', fontSize: '.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', borderBottom: '2px solid var(--red)' }}>
-                        <span>#</span><span></span><span>JUGADOR</span><span>BARRIO</span><span>PARTIDOS</span><span>NIVEL</span><span style={{ textAlign: 'center' }}>MODIFICAR</span>
+                    <div style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 120px 120px 70px 120px 100px', gap: '.75rem', padding: '.4rem .75rem', fontSize: '.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.1em', color: 'var(--muted)', borderBottom: '2px solid var(--red)' }}>
+                        <span>#</span><span></span><span>JUGADOR</span><span>BARRIO</span><span>DEPORTE FAV</span><span>PARTIDOS</span><span>NIVEL</span><span style={{ textAlign: 'center' }}>MODIFICAR</span>
                     </div>
                     {[...usuarios].sort((a, b) => Number(a.id) - Number(b.id)).map((u, i) => {
                         const esMiPerfil = currentUser && Number(currentUser.id) === Number(u.id);
                         return (
-                            <div key={u.id} className="usuario-row" style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 140px 70px 120px 100px', gap: '.75rem', alignItems: 'center' }}>
+                            <div key={u.id} className="usuario-row" style={{ display: 'grid', gridTemplateColumns: '32px 40px 1fr 120px 120px 70px 120px 100px', gap: '.75rem', alignItems: 'center' }}>
                                 <span className="number">{i + 1}</span>
                                 <div className="avatar">{initials(u.nombreUsuario)}</div>
                                 <div>
@@ -81,6 +82,7 @@ export default function UsuariosList({ usuarios, partidos, deportes, barrios, cu
                                     <div className="usuario-meta">{u.email}</div>
                                 </div>
                                 <div className="usuario-meta">📍 {u.barrio || '—'}</div>
+                                <div className="usuario-meta">{u.deporteFavorito ? (SPORT_ICONS[u.deporteFavorito] || '🏟') + ' ' + u.deporteFavorito : '—'}</div>
                                 <span style={{ fontFamily: "'Barlow Condensed'", fontWeight: 700, fontSize: '.95rem', color: 'var(--text)', textAlign: 'center' }}>
                                     {u.cantidadPartidosCompletados || 0}
                                 </span>
