@@ -10,7 +10,13 @@ export default function PartidosList({ partidos, usuarios, deportes, barrios, cu
     const [filterEstado, setFilterEstado] = useState('Todos');
 
     const ESTADOS = ['Todos', 'Necesitamos jugadores', 'Partido armado', 'Confirmado', 'En juego', 'Finalizado', 'Cancelado'];
-    const filtered = filterEstado === 'Todos' ? partidos : partidos.filter(p => p.estado === filterEstado);
+
+    // Solo los partidos del usuario logueado (creador o jugador inscripto)
+    const misPartidos = !currentUser ? [] : partidos.filter(p =>
+        (p.creadorId && Number(p.creadorId) === Number(currentUser.id)) ||
+        (p.jugadores && p.jugadores.some(j => j.nombre === currentUser.nombreUsuario))
+    );
+    const filtered = filterEstado === 'Todos' ? misPartidos : misPartidos.filter(p => p.estado === filterEstado);
 
     // Generic action gated on login
     const doAction = async (fn) => {
@@ -26,14 +32,33 @@ export default function PartidosList({ partidos, usuarios, deportes, barrios, cu
         <div>
             <div className="section-header">
                 <div>
-                    <div className="section-label">Calendario</div>
-                    <div className="section-title">Partidos ({filtered.length})</div>
+                    <div className="section-label">Mi Calendario</div>
+                    <div className="section-title">Mis Partidos ({filtered.length})</div>
                 </div>
                 <button className="btn btn-primary" onClick={() => {
                     if (!currentUser) { onLoginRequired(); return; }
                     setShowCreate(true);
                 }}>+ NUEVO PARTIDO</button>
             </div>
+
+            {/* Cartel de sesión requerida */}
+            {!currentUser && (
+                <div style={{
+                    border: '1.5px solid var(--gold)',
+                    borderRadius: 8,
+                    padding: '1rem 1.5rem',
+                    color: 'var(--gold)',
+                    fontFamily: "'Barlow Condensed'",
+                    fontWeight: 700,
+                    fontSize: '1rem',
+                    letterSpacing: '.06em',
+                    textAlign: 'center',
+                    marginTop: '1rem',
+                    background: 'rgba(212,175,55,.07)',
+                }}>
+                    ⚠ INICIÁ SESIÓN PARA VER TUS PARTIDOS
+                </div>
+            )}
 
             {/* Filter bar */}
             <div className="filter-bar">
@@ -45,9 +70,9 @@ export default function PartidosList({ partidos, usuarios, deportes, barrios, cu
                 ))}
             </div>
 
-            {filtered.length === 0
-                ? <div className="empty">— SIN PARTIDOS —</div>
-                : <div className="partidos-grid">
+            {currentUser && filtered.length === 0
+                ? <div className="empty">— AÚN NO TENÉS PARTIDOS —</div>
+                : currentUser && <div className="partidos-grid">
                     {filtered.map(p => (
                         <div key={p.id} className="score-card">
                             {/* Header */}

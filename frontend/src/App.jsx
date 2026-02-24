@@ -69,7 +69,7 @@ export default function App() {
         <span className="logo">UNO<span>MÁS</span></span>
 
         <nav className="nav">
-          {[['dashboard', 'INICIO'], ['buscar', 'BUSCAR'], ['partidos', 'PARTIDOS'], ['usuarios', 'JUGADORES']].map(([id, label]) => (
+          {[['dashboard', 'INICIO'], ['buscar', 'BUSCAR'], ['partidos', 'MIS PARTIDOS'], ['usuarios', 'JUGADORES']].map(([id, label]) => (
             <button key={id} className={`nav-btn${page === id ? ' active' : ''}`} onClick={() => setPage(id)}>{label}</button>
           ))}
         </nav>
