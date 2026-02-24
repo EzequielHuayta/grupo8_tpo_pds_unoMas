@@ -8,10 +8,6 @@ import org.example.nivel.Principiante;
 import org.example.service.PartidoService;
 import org.example.service.UsuarioService;
 import org.example.service.DeporteService;
-import org.example.strategy.EmparejadorHistorialStrategy;
-import org.example.strategy.EmparejadorNivelStrategy;
-import org.example.strategy.EmparejadorUbicacionStrategy;
-import org.example.strategy.IEmparejadorStrategy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -114,8 +110,8 @@ public class PartidoController {
                 if (pesoCreador < nivelMin.getPesoNivel() || pesoCreador > nivelMax.getPesoNivel()) {
                     throw new IllegalArgumentException(
                             "Tu nivel (" + creador.getNivel().getNombre()
-                            + ") no está dentro del rango " + nivelMin.getNombre()
-                            + " – " + nivelMax.getNombre());
+                                    + ") no está dentro del rango " + nivelMin.getNombre()
+                                    + " – " + nivelMax.getNombre());
                 }
             }
 
@@ -207,12 +203,9 @@ public class PartidoController {
         }
     }
 
-    // GET /api/partidos/buscar?usuarioId=1&estrategia=NIVEL
-    // estrategia: NIVEL | UBICACION | HISTORIAL
+    // GET /api/partidos/buscar?usuarioId=1
     @GetMapping("/buscar")
-    public ResponseEntity<?> buscarPartidos(
-            @RequestParam Long usuarioId,
-            @RequestParam(defaultValue = "NIVEL") String estrategia) {
+    public ResponseEntity<?> buscarPartidos(@RequestParam Long usuarioId) {
         try {
             Usuario usuario = usuarioService.buscarPorId(usuarioId);
 
@@ -225,34 +218,14 @@ public class PartidoController {
                     .filter(p -> p.getCreadorId() == null || !p.getCreadorId().equals(usuarioId))
                     .collect(java.util.stream.Collectors.toList());
 
-            // --- DEBUG ---
             System.out.println("[buscarPartidos] usuarioId=" + usuarioId
-                    + " estrategia=" + estrategia
-                    + " barrio=" + (usuario.getUbicacion() != null ? usuario.getUbicacion().getBarrio() : "NULL")
-                    + " nivel=" + usuario.getNivel().getNombre()
-                    + " disponibles=" + disponibles.size());
-            disponibles.forEach(p -> System.out.println(
-                    "  → Partido #" + p.getIdPartido()
-                    + " barrio=[" + (p.getUbicacion() != null ? p.getUbicacion().getBarrio() : "NULL") + "]"
-                    + " nivelMin=" + p.getNivelMinimo().getNombre()
-                    + " nivelMax=" + p.getNivelMaximo().getNombre()));
-            // --- FIN DEBUG ---
+                    + " | estrategia=" + (usuario.getEstrategiaEmparejamiento() != null
+                            ? usuario.getEstrategiaEmparejamiento().getClass().getSimpleName()
+                            : "ninguna (devuelve todos)")
+                    + " | disponibles=" + disponibles.size());
 
-            // Seleccionar estrategia
-            IEmparejadorStrategy strategy;
-            switch (estrategia.toUpperCase()) {
-                case "UBICACION":
-                    strategy = new EmparejadorUbicacionStrategy();
-                    break;
-                case "HISTORIAL":
-                    strategy = new EmparejadorHistorialStrategy(partidoService.getPartidos());
-                    break;
-                default:
-                    strategy = new EmparejadorNivelStrategy();
-                    break;
-            }
-
-            List<Partido> resultado = strategy.buscarPartido(usuario, disponibles);
+            // Delegar en la estrategia del usuario (si no tiene, devuelve todos)
+            List<Partido> resultado = usuario.buscarPartido(disponibles);
 
             return ResponseEntity.ok(resultado.stream().map(this::toMap).collect(java.util.stream.Collectors.toList()));
         } catch (IllegalArgumentException e) {

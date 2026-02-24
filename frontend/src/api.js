@@ -25,7 +25,7 @@ export const api = {
   cancelarPartido: (id, creadorId) => req(`/partidos/${id}/cancelar${creadorId ? `?creadorId=${creadorId}` : ''}`, { method: 'PUT' }),
   getDeportes: () => req('/partidos/deportes'),
   getBarrios: () => req('/partidos/barrios'),
-  buscarPartidos: (usuarioId, estrategia) => req(`/partidos/buscar?usuarioId=${usuarioId}&estrategia=${estrategia}`),
+  buscarPartidos: (usuarioId) => req(`/partidos/buscar?usuarioId=${usuarioId}`),
 
   // Usuarios
   getUsuarios: () => req('/usuarios'),
@@ -34,6 +34,7 @@ export const api = {
   loginSimple: (nombre) => req('/usuarios/login-simple', { method: 'POST', body: JSON.stringify({ nombreUsuario: nombre }) }),
   cambiarNivel: (id, nivel) => req(`/usuarios/${id}/nivel`, { method: 'PUT', body: JSON.stringify({ nivel }) }),
   modificarUsuario: (id, body) => req(`/usuarios/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  setEstrategiaBusqueda: (id, estrategia) => req(`/usuarios/${id}/estrategia-busqueda`, { method: 'PUT', body: JSON.stringify({ estrategia }) }),
   getNotificaciones: (id) => req(`/usuarios/${id}/notificaciones`),
   leerNotificaciones: (id) => req(`/usuarios/${id}/notificaciones`, { method: 'DELETE' }).catch(() => { }),
 };

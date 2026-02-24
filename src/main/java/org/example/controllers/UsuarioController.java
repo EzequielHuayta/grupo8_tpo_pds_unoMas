@@ -205,6 +205,21 @@ public class UsuarioController {
         }
     }
 
+    // ─── PUT /api/usuarios/{id}/estrategia-busqueda ─────────────────────────────
+
+    @PutMapping("/{id}/estrategia-busqueda")
+    public ResponseEntity<?> setEstrategiaBusqueda(@PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        try {
+            String key = body.getOrDefault("estrategia", "NIVEL");
+            Usuario usuario = usuarioService.buscarPorId(id);
+            usuarioService.setEstrategiaEmparejamiento(usuario, key, partidoService.getPartidos());
+            return ResponseEntity.ok(Collections.singletonMap("estrategiaBusqueda", key));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
     // ─── PUT /api/usuarios/{id}/nivel (delegado) ─────────────────────────────
 
     @PutMapping("/{id}/nivel")

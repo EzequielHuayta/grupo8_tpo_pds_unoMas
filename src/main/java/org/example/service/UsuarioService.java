@@ -6,6 +6,10 @@ import org.example.model.Ubicacion;
 import org.example.model.Usuario;
 import org.example.nivel.NivelState;
 import org.example.repository.IUsuarioRepository;
+import org.example.strategy.EmparejadorHistorialStrategy;
+import org.example.strategy.EmparejadorNivelStrategy;
+import org.example.strategy.EmparejadorUbicacionStrategy;
+import org.example.strategy.IEmparejadorStrategy;
 
 import org.springframework.stereotype.Service;
 
@@ -44,6 +48,45 @@ public class UsuarioService {
         deporte.agregarUsuario(usuario);
         usuarioRepository.guardar(usuario);
         System.out.println(usuario.getNombreUsuario() + " → deporte favorito: " + deporte.getNombre());
+    }
+
+    public void setEstrategiaEmparejamiento(Usuario usuario, String estrategiaKey, List<Partido> todosLosPartidos) {
+        IEmparejadorStrategy estrategia;
+        switch (estrategiaKey.toUpperCase()) {
+            case "UBICACION":
+                estrategia = new EmparejadorUbicacionStrategy();
+                break;
+            case "HISTORIAL":
+                estrategia = new EmparejadorHistorialStrategy(todosLosPartidos);
+                break;
+            default: // NIVEL o cualquier otro valor
+                estrategia = new EmparejadorNivelStrategy();
+                break;
+        }
+        // Obtener nombre legible de la estrategia anterior
+        String estrategiaAnterior = "ninguna";
+        if (usuario.getEstrategiaEmparejamiento() instanceof EmparejadorUbicacionStrategy)
+            estrategiaAnterior = "Por Ubicación";
+        else if (usuario.getEstrategiaEmparejamiento() instanceof EmparejadorHistorialStrategy)
+            estrategiaAnterior = "Por Historial";
+        else if (usuario.getEstrategiaEmparejamiento() instanceof EmparejadorNivelStrategy)
+            estrategiaAnterior = "Por Nivel";
+
+        usuario.cambiarEstrategiaEmparejamiento(estrategia);
+        usuarioRepository.guardar(usuario);
+
+        String estrategiaNueva = estrategiaKey.equalsIgnoreCase("UBICACION") ? "Por Ubicación"
+                : estrategiaKey.equalsIgnoreCase("HISTORIAL") ? "Por Historial"
+                        : "Por Nivel";
+
+        System.out.println("┌─────────────────────────────────────────────────");
+        System.out.println("│ [ESTRATEGIA DE BÚSQUEDA ACTUALIZADA]");
+        System.out.println("│  Usuario ID : " + usuario.getIdUsuario());
+        System.out.println("│  Usuario    : " + usuario.getNombreUsuario());
+        System.out.println("│  Anterior   : " + estrategiaAnterior);
+        System.out.println("│  Nueva      : " + estrategiaNueva
+                + " (" + estrategia.getClass().getSimpleName() + ")");
+        System.out.println("└─────────────────────────────────────────────────");
     }
 
     public void setNivel(Usuario usuario, NivelState nivel) {

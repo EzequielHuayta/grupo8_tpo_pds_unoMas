@@ -11,6 +11,10 @@ import org.example.notification.EmailNotificacionStrategy;
 import org.example.notification.FirebaseNotificacionStrategy;
 import org.example.notification.InAppNotificacionStore;
 import org.example.model.Deporte;
+import org.example.strategy.EmparejadorHistorialStrategy;
+import org.example.strategy.EmparejadorNivelStrategy;
+import org.example.strategy.EmparejadorUbicacionStrategy;
+import org.example.strategy.IEmparejadorStrategy;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
@@ -45,7 +49,8 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
         if (!file.exists())
             return;
 
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
             String line;
             while ((line = br.readLine()) != null) {
                 if (line.trim().isEmpty())
@@ -61,6 +66,7 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
                 String historial = p.length > 6 ? p[6] : "";
                 String estrategiaStr = p.length > 7 ? p[7] : "Email";
                 String deporteStr = p.length > 8 ? p[8] : "";
+                String empStr = p.length > 9 ? p[9] : "";
 
                 Usuario u = new Usuario(id, nombre, email, contra);
                 u.setUbicacion(new Ubicacion(barrio));
@@ -80,6 +86,23 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
                 } else {
                     u.setEstrategiaNotificacion(
                             new EmailNotificacionStrategy(adapterEmail, email, id, nombre));
+                }
+
+                // Estrategia de emparejamiento
+                if (!empStr.isEmpty()) {
+                    IEmparejadorStrategy emp;
+                    switch (empStr.toUpperCase()) {
+                        case "UBICACION":
+                            emp = new EmparejadorUbicacionStrategy();
+                            break;
+                        case "HISTORIAL":
+                            emp = new EmparejadorHistorialStrategy(new java.util.ArrayList<>());
+                            break;
+                        default:
+                            emp = new EmparejadorNivelStrategy();
+                            break;
+                    }
+                    u.cambiarEstrategiaEmparejamiento(emp);
                 }
 
                 // Restore partido IDs
@@ -104,7 +127,8 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
 
     private void persistir() {
         new File("data").mkdirs();
-        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(FILE_PATH), StandardCharsets.UTF_8))) {
+        try (PrintWriter pw = new PrintWriter(
+                new OutputStreamWriter(new FileOutputStream(FILE_PATH), StandardCharsets.UTF_8))) {
             for (Usuario u : usuarios) {
                 String barrio = u.getUbicacion() != null ? u.getUbicacion().getBarrio() : "";
                 String historial = u.getHistorialPartidoIds().stream()
@@ -120,6 +144,15 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
                         ? String.valueOf(u.getDeporteFavorito().getIdDeporte())
                         : "";
 
+                // Estrategia de emparejamiento: guardar clave
+                String empKey = "";
+                if (u.getEstrategiaEmparejamiento() instanceof EmparejadorUbicacionStrategy)
+                    empKey = "UBICACION";
+                else if (u.getEstrategiaEmparejamiento() instanceof EmparejadorHistorialStrategy)
+                    empKey = "HISTORIAL";
+                else if (u.getEstrategiaEmparejamiento() instanceof EmparejadorNivelStrategy)
+                    empKey = "NIVEL";
+
                 pw.println(u.getIdUsuario() + "|"
                         + u.getNombreUsuario() + "|"
                         + u.getEmail() + "|"
@@ -128,7 +161,8 @@ public class UsuarioRepositoryImpl implements IUsuarioRepository {
                         + barrio + "|"
                         + historial + "|"
                         + estrategiaStr + "|"
-                        + deporteStr);
+                        + deporteStr + "|"
+                        + empKey);
             }
         } catch (IOException e) {
             System.err.println("[UsuarioRepo] Error al persistir: " + e.getMessage());

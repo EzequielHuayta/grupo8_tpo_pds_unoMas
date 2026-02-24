@@ -39,7 +39,10 @@ export default function BuscarPartidos({ currentUser, onLoginRequired, onRefresh
         setLoading(true);
         setBuscado(true);
         try {
-            const data = await api.buscarPartidos(currentUser.id, estrategia.key);
+            // 1. Guarda la estrategia elegida en el usuario
+            await api.setEstrategiaBusqueda(currentUser.id, estrategia.key);
+            // 2. Busca usando la estrategia ya seteada en el usuario
+            const data = await api.buscarPartidos(currentUser.id);
             setResultados(data);
         } catch (e) {
             toast(e.message, 'error');
