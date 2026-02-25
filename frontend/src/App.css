@@ -1,0 +1,735 @@
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --red: #cc0000;
+  --red-dark: #a00000;
+  --red-glow: rgba(204, 0, 0, 0.25);
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --surface2: #1f1f1f;
+  --surface3: #2a2a2a;
+  --border: #2e2e2e;
+  --text: #ffffff;
+  --muted: #999999;
+  --gold: #f0b414;
+  --green: #00c853;
+  --blue: #2979ff;
+  --radius: 4px;
+  --radius-lg: 6px;
+}
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--red);
+}
+
+/* ── Header / Nav ── */
+.header {
+  background: #111;
+  border-bottom: 3px solid var(--red);
+  padding: 0 1.5rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: var(--red);
+  text-transform: uppercase;
+}
+
+.logo span {
+  color: #fff;
+}
+
+.nav {
+  display: flex;
+  gap: 0;
+  height: 100%;
+}
+
+.nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 0 1.1rem;
+  height: 100%;
+  cursor: pointer;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -3px;
+  transition: color .15s, border-color .15s;
+}
+
+.nav-btn:hover {
+  color: #fff;
+}
+
+.nav-btn.active {
+  color: #fff;
+  border-bottom-color: var(--red);
+}
+
+/* ── Ticker ── */
+.ticker {
+  background: var(--red);
+  padding: .35rem 1.5rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.ticker-label {
+  background: #fff;
+  color: var(--red);
+  padding: .1rem .5rem;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ticker-items {
+  display: flex;
+  gap: 2rem;
+  animation: ticker 20s linear infinite;
+  white-space: nowrap;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Layout ── */
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main {
+  flex: 1;
+  padding: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Section label ── */
+.section-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: .35rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+/* ── Stats strip ── */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.stat-box {
+  background: var(--surface);
+  padding: 1.1rem 1rem;
+  text-align: center;
+  transition: background .15s;
+}
+
+.stat-box:hover {
+  background: var(--surface2);
+}
+
+.stat-box .value {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--red);
+  line-height: 1;
+}
+
+.stat-box .label {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-top: .25rem;
+}
+
+/* ── Dashboard grid ── */
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+}
+
+/* ── Score card (partido) ── */
+.score-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  transition: background .15s, border-color .15s;
+  cursor: default;
+}
+
+.score-card:hover {
+  background: var(--surface2);
+  border-color: #444;
+}
+
+.score-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+}
+
+.score-card-sport {
+  color: var(--text);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.score-card-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.score-card-players {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--red);
+  line-height: 1;
+}
+
+.score-card-players span {
+  color: var(--muted);
+  font-size: 1.2rem;
+}
+
+.score-card-info {
+  font-size: .78rem;
+  color: var(--muted);
+  text-align: right;
+}
+
+.score-card-info strong {
+  color: var(--text);
+}
+
+.score-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+/* ── Partidos grid ── */
+.partidos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+/* ── Filter bar ── */
+.filter-bar {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+  padding: .6rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+/* ── Usuario row ── */
+.usuario-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .85rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: background .15s;
+}
+
+.usuario-row:hover {
+  background: var(--surface2);
+}
+
+.number {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--surface3);
+  width: 28px;
+  text-align: center;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.usuario-name {
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+.usuario-meta {
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+/* ── Badge ── */
+.badge {
+  display: inline-block;
+  padding: .18rem .55rem;
+  border-radius: 2px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge-yellow {
+  background: #332500;
+  color: var(--gold);
+}
+
+.badge-blue {
+  background: #001a4d;
+  color: #64a6ff;
+}
+
+.badge-indigo {
+  background: #1a0040;
+  color: #bb86fc;
+}
+
+.badge-green {
+  background: #002615;
+  color: #69f0ae;
+}
+
+.badge-gray {
+  background: #1a1a1a;
+  color: var(--muted);
+}
+
+.badge-red {
+  background: #2a0000;
+  color: #ff5252;
+}
+
+.badge-purple {
+  background: #1a0033;
+  color: #ce93d8;
+}
+
+.badge-live {
+  background: var(--red);
+  color: #fff;
+  animation: pulse .8s ease-in-out infinite;
+}
+
+.badge-orange {
+  background: #2a1200;
+  color: #ff9800;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: .7;
+  }
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .5rem 1rem;
+  border-radius: var(--radius);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+}
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--red-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.btn-outline:hover,
+.btn-outline.active {
+  border-color: var(--red);
+  color: #fff;
+}
+
+.btn-success {
+  background: #002615;
+  border: 1px solid #00c853;
+  color: #69f0ae;
+}
+
+.btn-success:hover {
+  background: #003820;
+}
+
+.btn-danger {
+  background: #2a0000;
+  border: 1px solid var(--red);
+  color: #ff5252;
+}
+
+.btn-danger:hover {
+  background: #3a0000;
+}
+
+.btn-info {
+  background: #001a3a;
+  border: 1px solid #2979ff;
+  color: #64a6ff;
+}
+
+.btn-info:hover {
+  background: #002050;
+}
+
+.btn-gold {
+  background: #2a1e00;
+  border: 1px solid var(--gold);
+  color: var(--gold);
+}
+
+.btn-gold:hover {
+  background: #3a2a00;
+}
+
+.btn-sm {
+  padding: .3rem .65rem;
+  font-size: .8rem;
+}
+
+.btn:disabled {
+  opacity: .35;
+  cursor: not-allowed;
+}
+
+/* ── Modal ── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .85);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn .12s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--red);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp .18s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 1.25rem;
+  padding-bottom: .75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: .5rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Form ── */
+.form-group {
+  margin-bottom: .85rem;
+}
+
+.form-label {
+  display: block;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .3rem;
+}
+
+.form-control {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: .55rem .8rem;
+  border-radius: var(--radius);
+  font-family: 'Barlow', sans-serif;
+  font-size: .9rem;
+  outline: none;
+  transition: border-color .15s;
+}
+
+.form-control:focus {
+  border-color: var(--red);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .65rem;
+}
+
+/* ── Toast ── */
+.toast-container {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+}
+
+.toast {
+  padding: .65rem 1.1rem;
+  border-radius: var(--radius);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: .9rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  animation: slideUp .18s ease;
+}
+
+.toast-success {
+  background: #00c853;
+  color: #000;
+}
+
+.toast-error {
+  background: var(--red);
+  color: #fff;
+}
+
+/* ── Empty ── */
+.empty {
+  text-align: center;
+  padding: 2.5rem;
+  color: var(--muted);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--red);
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  margin: 2rem auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── Jugadores list ── */
+.jugadores-list {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+.jugador-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .35rem .65rem;
+  background: var(--bg);
+  border-radius: var(--radius);
+  font-size: .8rem;
+}
+
+/* ── Standing table (dashboard) ── */
+.stand-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .55rem .75rem;
+  border-bottom: 1px solid var(--border);
+  font-size: .85rem;
+  transition: background .12s;
+}
+
+.stand-row:hover {
+  background: var(--surface2);
+}
+
+.stand-row:last-child {
+  border-bottom: none;
+}
